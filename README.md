@@ -9,7 +9,7 @@ The application uses a shared browser-based data system so different sections of
 ## 🚀 Live Demo
 
 🔗 **Live Application:**
-`[ADD YOUR LIVE LINK HERE]`
+https://pathrabe2416.github.io/Gym_Tracker/
 
 ---
 
