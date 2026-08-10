@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<title>Gym Tracker — Settings</title>
+<style>
+  :root{
+    --bg:#0a0a0a;
+    --card:#151515;
+    --card-border:#232323;
+    --text:#f5f5f5;
+    --muted:#9a9a9a;
+    --green:#8fd13f;
+    --green-dark:#5e8f2a;
+    --blue:#4a90e2;
+    --red:#e0473f;
+    --radius-lg:18px;
+    --radius-md:14px;
+    --radius-sm:10px;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:"Inter","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    display:flex;
+    justify-content:center;
+  }
+
+  .app{
+    width:100%;
+    max-width:430px;
+    min-height:100vh;
+    background:var(--bg);
+    padding:70px 18px 100px;
+    position:relative;
+  }
+
+  a{color:inherit;text-decoration:none;}
+  button{font-family:inherit;}
+  input,select{font-family:inherit;}
+
+  /* ---------- Header (matches workouts.html / macros2.html) ---------- */
+  .topbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    position:fixed;
+    top:0;
+    left:50%;
+    transform:translateX(-50%);
+    width:100%;
+    max-width:430px;
+    z-index:100;
+    padding:12px 18px;
+    background:var(--bg);
+    box-shadow:0 8px 20px rgba(0,0,0,.3);
+    border-bottom:1px solid var(--card-border);
+  }
+  .back-btn{
+    background:none;
+    border:none;
+    color:var(--text);
+    cursor:pointer;
+    padding:6px;
+    display:flex;
+  }
+  .brand{
+    display:flex;
+    flex-direction:column;
+    line-height:1.05;
+    font-weight:800;
+    letter-spacing:.5px;
+    font-size:15px;
+    text-align:center;
+  }
+  .brand .accent{color:var(--green);}
+  .spacer34{width:34px;}
+
+  h1.page-title{
+    font-size:26px;
+    margin:0 0 4px;
+    font-weight:800;
+  }
+  .subtext{
+    color:var(--muted);
+    font-size:13px;
+    margin:0 0 20px;
+  }
+
+  section{margin-bottom:14px;}
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--card-border);
+    border-radius:var(--radius-lg);
+    padding:16px;
+  }
+  .card-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:4px;
+  }
+  .card-head-left{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-weight:700;
+    font-size:15px;
+  }
+
+  /* ---------- Profile card ---------- */
+  .profile-card{
+    display:flex;
+    align-items:center;
+    gap:16px;
+  }
+  .avatar-wrapper{
+    position:relative;
+    width:72px;
+    height:72px;
+    flex-shrink:0;
+    cursor:pointer;
+  }
+  #profilePic{
+    width:72px;
+    height:72px;
+    border-radius:50%;
+    object-fit:cover;
+    border:1px solid var(--card-border);
+    display:block;
+  }
+  .edit-overlay{
+    position:absolute;
+    bottom:-2px;right:-2px;
+    background:var(--green);
+    width:24px;height:24px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border:2px solid var(--bg);
+  }
+  .profile-info{flex:1;min-width:0;}
+  .profile-info input{
+    background:transparent;
+    border:none;
+    border-bottom:1px dashed transparent;
+    color:var(--text);
+    font-size:19px;
+    font-weight:800;
+    width:100%;
+    outline:none;
+    padding:2px 0;
+  }
+  .profile-info input:focus{border-bottom-color:var(--green);}
+  .sub-label{
+    color:var(--green);
+    font-size:12.5px;
+    font-weight:700;
+    cursor:pointer;
+    margin-top:2px;
+  }
+  #fileInput{display:none;}
+
+  /* ---------- Settings rows ---------- */
+  .row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:12px 0;
+    border-top:1px solid #202020;
+  }
+  .row:first-of-type{border-top:none;padding-top:14px;}
+  .row:last-child{padding-bottom:2px;}
+  .row.clickable{cursor:pointer;}
+  .row.clickable svg{color:var(--muted);}
+  .label{font-size:14px;font-weight:600;}
+  .row-right{display:flex;align-items:center;gap:6px;}
+
+  .input-field{
+    background:#0f0f0f;
+    border:1px solid var(--card-border);
+    color:var(--green);
+    padding:8px 10px;
+    border-radius:10px;
+    width:76px;
+    text-align:right;
+    font-weight:700;
+    font-size:14px;
+    outline:none;
+  }
+  .input-field:focus{border-color:var(--green);}
+
+  /* Kill native number-input spin buttons */
+  input[type="number"]{-moz-appearance:textfield;appearance:textfield;}
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button{
+    -webkit-appearance:none;
+    margin:0;
+  }
+
+  select.input-field{
+    width:auto;
+    appearance:none;
+    -webkit-appearance:none;
+    padding-right:28px;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238fd13f' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;
+    background-position:right 10px center;
+    text-align:left;
+  }
+
+  .unit-suffix{font-size:12px;color:var(--muted);}
+
+  .toggle{
+    position:relative;
+    width:42px;height:24px;
+    flex-shrink:0;
+  }
+  .toggle input{
+    position:absolute;
+    opacity:0;
+    width:100%;height:100%;
+    margin:0;
+    cursor:pointer;
+    z-index:1;
+  }
+  .toggle-track{
+    position:absolute;
+    inset:0;
+    background:#2a2a2a;
+    border-radius:14px;
+    transition:background .15s ease;
+  }
+  .toggle-thumb{
+    position:absolute;
+    top:3px;left:3px;
+    width:18px;height:18px;
+    border-radius:50%;
+    background:var(--text);
+    transition:transform .15s ease;
+  }
+  .toggle input:checked ~ .toggle-track{background:var(--green);}
+  .toggle input:checked ~ .toggle-thumb{transform:translateX(18px);background:#122007;}
+
+  .btn-secondary{
+    width:100%;
+    background:#1f1f1f;
+    color:var(--text);
+    border:1px solid var(--card-border);
+    padding:12px;
+    border-radius:12px;
+    font-weight:700;
+    font-size:14px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    cursor:pointer;
+    margin-top:4px;
+  }
+  .btn-secondary:active{filter:brightness(1.15);}
+
+  /* ---------- Bottom nav (matches other pages) ---------- */
+  .bottom-nav{
+    position:fixed;
+    bottom:0;
+    left:50%;
+    transform:translateX(-50%);
+    width:100%;
+    max-width:430px;
+    background:#0a0a0a;
+    border-top:1px solid var(--card-border);
+    display:flex;
+    justify-content:space-around;
+    padding:10px 4px 14px;
+    z-index:100;
+  }
+  .nav-item{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:4px;
+    color:var(--muted);
+    font-size:10.5px;
+    font-weight:600;
+    cursor:pointer;
+  }
+  .nav-item.active{color:var(--green);}
+  .nav-item svg{width:21px;height:21px;}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="topbar">
+    <a class="back-btn" href="index.html" aria-label="Back to dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </a>
+    <div class="brand">
+      <span>GYM</span>
+      <span class="accent">TRACKER</span>
+    </div>
+    <div class="spacer34"></div>
+  </div>
+
+  <h1 class="page-title">Settings</h1>
+  <p class="subtext">Manage your profile, units, and data.</p>
+
+  <section class="card profile-card">
+    <div class="avatar-wrapper" onclick="document.getElementById('fileInput').click()">
+      <img id="profilePic" src="https://via.placeholder.com/150" alt="Profile">
+      <div class="edit-overlay">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#122007" stroke-width="3"><path d="M12 5v14M5 12h14"/></svg>
+      </div>
+    </div>
+    <div class="profile-info">
+      <input type="text" id="nameInput" placeholder="Enter Name" onchange="saveData()">
+      <div class="sub-label" onclick="document.getElementById('nameInput').focus()">Edit Profile</div>
+    </div>
+  </section>
+
+  <input type="file" id="fileInput" accept="image/*" onchange="uploadImage(event)">
+
+  <section class="card">
+    <div class="card-head">
+      <div class="card-head-left">📏 Units &amp; Body Stats</div>
+    </div>
+
+    <div class="row">
+      <span class="label">Units</span>
+      <select id="unitInput" class="input-field" onchange="saveData()">
+        <option value="Metric">Metric (kg, cm)</option>
+        <option value="Imperial">Imperial (lb, ft)</option>
+      </select>
+    </div>
+    <div class="row">
+      <span class="label">Current Weight</span>
+      <div class="row-right">
+        <input type="number" inputmode="decimal" id="weightInput" class="input-field" onchange="saveData()">
+        <span id="wUnit" class="unit-suffix">kg</span>
+      </div>
+    </div>
+    <div class="row">
+      <span class="label">Current Height</span>
+      <div class="row-right">
+        <input type="number" inputmode="decimal" id="heightInput" class="input-field" onchange="saveData()">
+        <span id="hUnit" class="unit-suffix">cm</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <div class="card-head-left">⚙️ Preferences</div>
+    </div>
+
+    <div class="row">
+      <span class="label">Notifications</span>
+      <label class="toggle">
+        <input type="checkbox" id="notifInput" checked onchange="saveData()">
+        <span class="toggle-track"></span>
+        <span class="toggle-thumb"></span>
+      </label>
+    </div>
+
+    <a class="btn-secondary" href="export.html">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+      Export Data
+    </a>
+  </section>
+
+  <nav class="bottom-nav">
+    <a href="index.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M4 11l8-7 8 7v9a1 1 0 01-1 1h-4v-6H9v6H5a1 1 0 01-1-1v-9z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+      Dashboard
+    </a>
+    <a href="workouts.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M6.5 6.5l11 11M4 9l3-3M17 20l3-3M2 12l2-2M20 14l2-2M7 5l2-2M15 21l2-2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      Workouts
+    </a>
+    <a href="exercises.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="6" r="2" stroke="currentColor" stroke-width="1.8"/><path d="M12 8v6M9 12h6M9 21l3-7 3 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Exercises
+    </a>
+    <a href="macros.html" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M6 3v9a2 2 0 002 2h0a2 2 0 002-2V3M8 14v7M18 3c-2 1-3 3-3 6s1 5 3 6M18 3v18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Nutrition
+    </a>
+    <a href="settings.html" class="nav-item active">
+      <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M19.4 15a1.7 1.7 0 00.3 1.9l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.9-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1-1.6 1.7 1.7 0 00-1.9.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.9 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1 1.7 1.7 0 00-.3-1.9l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.9.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.9-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.9V9a1.7 1.7 0 001.5 1h.1a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+      Settings
+    </a>
+  </nav>
+</div>
+
+<script>
+  const STORAGE_KEY = 'gymTrackerData';
+
+  // Function to safely load data
+  function loadData() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) {
+        console.log("No data found, using defaults");
+        return;
+      }
+
+      const data = JSON.parse(raw);
+
+      // Defensive check: If data exists but user object is missing, create it
+      if (!data.user) data.user = {};
+
+      // 1. Load Name
+      if (data.user.name) {
+        document.getElementById('nameInput').value = data.user.name;
+      }
+
+      // 2. Load Weight/Height
+      document.getElementById('weightInput').value = data.user.weight || 70;
+      document.getElementById('heightInput').value = data.user.height || 170;
+
+      // 3. Load Units
+      const currentUnit = data.user.unit || "Metric";
+      document.getElementById('unitInput').value = currentUnit;
+      updateUnitLabels(currentUnit);
+
+      // 4. Load Notifications preference
+      document.getElementById('notifInput').checked = data.user.notifications !== false;
+
+      // 5. Load Profile Picture
+      if (data.user.image && data.user.image.startsWith('data:image')) {
+        document.getElementById('profilePic').src = data.user.image;
+      } else {
+        // Default placeholder if no image exists
+        document.getElementById('profilePic').src = "https://via.placeholder.com/150";
+      }
+
+      console.log("Settings loaded successfully");
+
+    } catch (error) {
+      console.error("Error loading settings:", error);
+      // If the data is corrupted, this prevents the page from "hanging"
+    }
+  }
+
+  // Function to save data without losing other data (like nutrition/activeWorkout)
+  function saveData() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      let data = raw ? JSON.parse(raw) : {};
+
+      // Initialize structures if they don't exist
+      if (!data.user) data.user = {};
+      if (!data.goals) data.goals = {};
+      if (!data.nutrition) data.nutrition = { meals: [], today: {} };
+
+      // Update User Info
+      data.user.name = document.getElementById('nameInput').value || "User";
+      data.user.weight = parseFloat(document.getElementById('weightInput').value) || 0;
+      data.user.height = parseFloat(document.getElementById('heightInput').value) || 0;
+      data.user.unit = document.getElementById('unitInput').value;
+      data.user.notifications = document.getElementById('notifInput').checked;
+
+      // Save image source
+      const currentImg = document.getElementById('profilePic').src;
+      if (currentImg.startsWith('data:image')) {
+        data.user.image = currentImg;
+      }
+
+      // Update units display immediately
+      updateUnitLabels(data.user.unit);
+
+      // Save back to storage
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      console.log("Settings saved!");
+
+    } catch (error) {
+      console.error("Error saving settings:", error);
+    }
+  }
+
+  function updateUnitLabels(unit) {
+    const wUnit = document.getElementById('wUnit');
+    const hUnit = document.getElementById('hUnit');
+    if (wUnit) wUnit.textContent = unit === "Metric" ? "kg" : "lb";
+    if (hUnit) hUnit.textContent = unit === "Metric" ? "cm" : "ft";
+  }
+
+  function uploadImage(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Limit file size to ~1MB to prevent localStorage overflow
+    if (file.size > 1024 * 1024) {
+      alert("Image is too large. Please pick an image under 1MB.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = function() {
+      document.getElementById('profilePic').src = reader.result;
+      saveData(); // Save immediately after upload
+    }
+    reader.readAsDataURL(file);
+  }
+
+  // Ensure loadData runs when the page is ready
+  window.addEventListener('DOMContentLoaded', loadData);
+</script>
+
+</body>
+</html>

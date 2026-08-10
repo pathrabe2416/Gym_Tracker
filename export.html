@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<title>Gym Tracker — Export Data</title>
+<style>
+  :root{
+    --bg:#0a0a0a;
+    --card:#151515;
+    --card-2:#101010;
+    --card-border:#232323;
+    --text:#f5f5f5;
+    --muted:#9a9a9a;
+    --green:#8fd13f;
+    --green-dark:#5e8f2a;
+    --blue:#4a90e2;
+    --red:#e0473f;
+    --purple:#a259d9;
+    --yellow:#f2c94c;
+    --orange:#f2843c;
+    --radius-lg:18px;
+    --radius-md:14px;
+    --radius-sm:10px;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:"Inter","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    display:flex;
+    justify-content:center;
+  }
+
+  .app{
+    width:100%;
+    max-width:430px;
+    min-height:100vh;
+    background:var(--bg);
+    padding:70px 18px 40px;
+    position:relative;
+  }
+
+  a{color:inherit;text-decoration:none;}
+  button{font-family:inherit;}
+
+  /* ---------- Header ---------- */
+  .topbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    position:fixed;
+    top:0;
+    left:50%;
+    transform:translateX(-50%);
+    width:100%;
+    max-width:430px;
+    z-index:100;
+    padding:12px 18px;
+    background:var(--bg);
+    box-shadow:0 8px 20px rgba(0,0,0,.3);
+    border-bottom:1px solid var(--card-border);
+  }
+  .back-btn{
+    background:none;
+    border:none;
+    color:var(--text);
+    cursor:pointer;
+    padding:6px;
+    display:flex;
+  }
+  .brand{
+    display:flex;
+    flex-direction:column;
+    line-height:1.05;
+    font-weight:800;
+    letter-spacing:.5px;
+    font-size:15px;
+    text-align:center;
+  }
+  .brand .accent{color:var(--green);}
+  .spacer34{width:34px;}
+
+  h1.page-title{
+    font-size:26px;
+    margin:0 0 4px;
+    font-weight:800;
+  }
+  .subtext{
+    color:var(--muted);
+    font-size:13px;
+    margin:0 0 20px;
+  }
+
+  section{margin-bottom:20px;}
+  .section-label{
+    font-size:11.5px;
+    font-weight:700;
+    color:var(--muted);
+    text-transform:uppercase;
+    letter-spacing:.5px;
+    margin:0 0 10px;
+  }
+
+  /* ---------- Format card ---------- */
+  .format-card{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    background:var(--card);
+    border:1.5px solid var(--green);
+    border-radius:var(--radius-lg);
+    padding:14px 16px;
+  }
+  .format-icon{
+    width:40px;height:48px;
+    border-radius:8px;
+    border:1.5px solid var(--text);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:10px;
+    font-weight:800;
+    flex-shrink:0;
+  }
+  .format-info{flex:1;}
+  .format-name{font-weight:700;font-size:15px;}
+  .format-sub{font-size:12px;color:var(--muted);margin-top:2px;}
+  .format-check{
+    width:22px;height:22px;
+    border-radius:50%;
+    background:var(--green);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+  }
+
+  /* ---------- Orientation toggle ---------- */
+  .orient-toggle{
+    display:flex;
+    gap:10px;
+  }
+  .orient-btn{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:8px;
+    background:var(--card);
+    border:1.5px solid var(--card-border);
+    border-radius:var(--radius-md);
+    padding:14px 10px;
+    cursor:pointer;
+    color:var(--text);
+  }
+  .orient-btn.active{
+    border-color:var(--green);
+    background:#132018;
+  }
+  .orient-btn .orient-shape{
+    border:2px solid var(--muted);
+    border-radius:4px;
+  }
+  .orient-btn.active .orient-shape{border-color:var(--green);}
+  .orient-btn[data-orient="portrait"] .orient-shape{width:24px;height:32px;}
+  .orient-btn[data-orient="landscape"] .orient-shape{width:32px;height:24px;}
+  .orient-btn .orient-label{font-size:12.5px;font-weight:700;}
+  .orient-btn.active .orient-label{color:var(--green);}
+
+  /* ---------- Include-in-report checklist ---------- */
+  .include-list{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .include-item{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    background:var(--card);
+    border:1px solid var(--card-border);
+    border-radius:var(--radius-md);
+    padding:13px 14px;
+    cursor:pointer;
+    user-select:none;
+  }
+  .check-box{
+    width:22px;height:22px;
+    border-radius:6px;
+    border:1.5px solid var(--card-border);
+    background:#0f0f0f;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+    transition:background .15s ease,border-color .15s ease;
+  }
+  .check-box.checked{background:var(--green);border-color:var(--green);}
+  .check-box svg{display:none;}
+  .check-box.checked svg{display:block;}
+  .include-icon{
+    width:20px;text-align:center;
+    font-size:16px;
+    flex-shrink:0;
+  }
+  .include-info{flex:1;min-width:0;}
+  .include-title{font-size:14px;font-weight:700;}
+  .include-sub{font-size:11.5px;color:var(--muted);margin-top:1px;}
+
+  /* ---------- Report preview ---------- */
+  .report-preview{
+    background:var(--card);
+    border:1px solid var(--card-border);
+    border-radius:var(--radius-lg);
+    padding:18px;
+  }
+  .rp-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    margin-bottom:16px;
+  }
+  .rp-brand{
+    font-size:17px;
+    font-weight:800;
+    letter-spacing:.3px;
+  }
+  .rp-brand .accent{color:var(--green);}
+  .rp-tagline{font-size:11.5px;color:var(--muted);margin-top:2px;}
+  .rp-date{text-align:right;white-space:nowrap;}
+  .rp-user-name{font-size:13px;font-weight:800;}
+  .rp-date-sub{font-size:10.5px;color:var(--muted);margin-top:1px;}
+  .rp-avatar{
+    width:38px;height:38px;
+    border-radius:50%;
+    object-fit:cover;
+    border:1px solid var(--card-border);
+    flex-shrink:0;
+    margin-left:8px;
+  }
+  .rp-avatar-fallback{
+    width:38px;height:38px;
+    border-radius:50%;
+    background:linear-gradient(145deg,#3a3a3a,#1c1c1c);
+    border:1px solid var(--card-border);
+    display:flex;align-items:center;justify-content:center;
+    font-weight:700;font-size:13px;
+    flex-shrink:0;
+    margin-left:8px;
+  }
+  .rp-head-right{display:flex;align-items:center;}
+
+  .rp-weight-card{
+    background:var(--card-2);
+    border:1px solid var(--card-border);
+    border-radius:var(--radius-md);
+    padding:16px;
+    text-align:center;
+    margin-bottom:16px;
+  }
+  .rp-weight-label{
+    font-size:11.5px;
+    color:var(--muted);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    margin-bottom:6px;
+  }
+  .rp-weight-value{font-size:28px;font-weight:800;}
+  .rp-weight-value span{font-size:14px;font-weight:600;color:var(--muted);margin-left:3px;}
+
+  .rp-card{
+    background:var(--card-2);
+    border:1px solid var(--card-border);
+    border-radius:var(--radius-md);
+    padding:14px;
+    margin-bottom:12px;
+  }
+  .rp-card:last-child{margin-bottom:0;}
+  .rp-card-title{
+    font-size:13.5px;
+    font-weight:700;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    margin-bottom:10px;
+  }
+
+  .donut-row{display:flex;align-items:center;gap:16px;}
+  .legend{flex:1;display:flex;flex-direction:column;gap:8px;}
+  .legend-item{display:flex;align-items:center;gap:8px;font-size:12px;}
+  .legend-item .sw{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+  .legend-item .lname{flex:1;}
+  .legend-item .lval{color:var(--muted);font-weight:600;}
+
+  .bar-row{margin-bottom:12px;}
+  .bar-row:last-child{margin-bottom:0;}
+  .bar-row-head{
+    display:flex;
+    justify-content:space-between;
+    font-size:12.5px;
+    margin-bottom:5px;
+  }
+  .bar-row-head b{font-weight:700;}
+  .bar-track{
+    height:6px;
+    border-radius:4px;
+    background:#232323;
+    overflow:hidden;
+  }
+  .bar-fill{display:block;height:100%;border-radius:4px;background:var(--green);}
+
+  .rp-ex-item{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    padding:8px 0;
+    border-top:1px solid #202020;
+    font-size:12.5px;
+  }
+  .rp-ex-item:first-of-type{border-top:none;padding-top:0;}
+  .rp-ex-name{font-weight:600;}
+  .rp-ex-detail{color:var(--muted);white-space:nowrap;}
+
+  .muscle-bar{
+    display:flex;
+    height:9px;
+    border-radius:5px;
+    overflow:hidden;
+    margin-bottom:10px;
+  }
+  .muscle-legend{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px 14px;
+  }
+  .muscle-legend-item{font-size:11.5px;color:var(--muted);display:flex;align-items:center;gap:5px;}
+  .muscle-legend-item .sw{width:8px;height:8px;border-radius:50%;}
+  .muscle-legend-item b{color:var(--text);font-weight:700;}
+
+  .rp-profile-row{
+    display:flex;
+    justify-content:space-between;
+    font-size:12.5px;
+    padding:7px 0;
+    border-top:1px solid #202020;
+  }
+  .rp-profile-row:first-of-type{border-top:none;padding-top:0;}
+  .rp-profile-row span:first-child{color:var(--muted);}
+  .rp-profile-row span:last-child{font-weight:700;}
+
+  .rp-cards-grid{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+  .rp-cards-grid .rp-card{margin-bottom:0;}
+
+  .rp-empty{
+    text-align:center;
+    color:var(--muted);
+    font-size:12.5px;
+    padding:14px 0;
+  }
+
+  /* ---------- Export button ---------- */
+  .btn-primary{
+    width:100%;
+    background:var(--green);
+    color:#122007;
+    border:none;
+    padding:15px;
+    border-radius:12px;
+    font-weight:700;
+    font-size:15px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    cursor:pointer;
+  }
+  .btn-primary:active{filter:brightness(.92);}
+
+  .toast{
+    position:fixed;
+    bottom:24px;left:50%;
+    transform:translateX(-50%) translateY(20px);
+    background:#1c2c14;
+    color:var(--green);
+    border:1px solid #2e4a1c;
+    padding:10px 18px;
+    border-radius:30px;
+    font-size:13px;
+    font-weight:600;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .25s ease, transform .25s ease;
+    z-index:500;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  /* Full-bleed print background layer. html/body only grow to their
+     content height (auto), so a background on them stops wherever the
+     content stops — it does NOT fill the empty space below short
+     content on a later page (e.g. page 2 with just the Profile card).
+     A position:fixed element is repainted by Chrome on every printed
+     page, so this tiles solid black behind page 1, page 2, etc.
+     Hidden on screen; only switched on inside @media print below. */
+  .print-bg-fill{ display:none; }
+
+  /* ---------- Print / PDF output ---------- */
+  @media print{
+    html, body{
+      background:var(--bg) !important;
+      -webkit-print-color-adjust:exact;
+      print-color-adjust:exact;
+    }
+
+    body *{visibility:hidden;}
+    .report-preview, .report-preview *{visibility:visible;}
+
+    .print-bg-fill{
+      display:block;
+      visibility:visible !important;
+      position:fixed;
+      top:0;left:0;right:0;bottom:0;
+      width:100%;height:100%;
+      background:var(--bg);
+      z-index:-1;
+      -webkit-print-color-adjust:exact;
+      print-color-adjust:exact;
+    }
+
+    .app{max-width:none;width:100%;padding:0;}
+
+    .report-preview{
+      position:absolute;
+      top:0;left:0;
+      width:100%;
+      border:none;
+      border-radius:0;
+      padding:16mm;
+      -webkit-print-color-adjust:exact;
+      print-color-adjust:exact;
+    }
+
+    .rp-brand{font-size:22px;}
+    .rp-tagline{font-size:13px;}
+    .rp-head{
+      margin-bottom:22px;
+      padding-bottom:16px;
+      border-bottom:2px solid var(--green);
+    }
+    .rp-user-name{font-size:15px;}
+    .rp-avatar,.rp-avatar-fallback{width:46px;height:46px;}
+
+    .rp-weight-card{padding:20px;margin-bottom:18px;}
+    .rp-weight-value{font-size:34px;}
+
+    .rp-card-title{font-size:15px;}
+
+    .rp-card, .rp-weight-card, .rp-head{
+      break-inside:avoid;
+      page-break-inside:avoid;
+    }
+
+    .report-preview.landscape .rp-cards-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:16px;
+      align-items:start;
+    }
+    .report-preview.landscape .rp-cards-grid .rp-card{
+      margin-bottom:0;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="print-bg-fill"></div>
+<div class="app">
+
+  <div class="topbar">
+    <a class="back-btn" href="settings.html" aria-label="Back to settings">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </a>
+    <div class="brand">
+      <span>GYM</span>
+      <span class="accent">TRACKER</span>
+    </div>
+    <div class="spacer34"></div>
+  </div>
+
+  <h1 class="page-title">Export Data</h1>
+  <p class="subtext">Download your fitness journey anytime.</p>
+
+  <section>
+    <div class="section-label">Choose Format</div>
+    <div class="format-card">
+      <div class="format-icon">PDF</div>
+      <div class="format-info">
+        <div class="format-name">PDF</div>
+        <div class="format-sub">Best for sharing</div>
+      </div>
+      <div class="format-check">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke="#122007" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-label">Orientation</div>
+    <div class="orient-toggle" id="orientToggle">
+      <button class="orient-btn" data-orient="portrait">
+        <span class="orient-shape"></span>
+        <span class="orient-label">Portrait</span>
+      </button>
+      <button class="orient-btn" data-orient="landscape">
+        <span class="orient-shape"></span>
+        <span class="orient-label">Landscape</span>
+      </button>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-label">Include In Report</div>
+    <div class="include-list" id="includeList"></div>
+  </section>
+
+  <section>
+    <div class="section-label">Report Preview</div>
+    <div class="report-preview" id="reportPreview"></div>
+  </section>
+
+  <button class="btn-primary" id="exportBtn">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#122007" stroke-width="2"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>
+    Export PDF Report
+  </button>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const STORAGE_KEY = 'gymTrackerData';
+
+// Which sections to include — Progress Stats has been removed by design;
+// current weight is always shown as a simple header stat instead.
+const include = {
+  workout: true,
+  nutrition: true,
+  profile: true
+};
+
+const INCLUDE_ITEMS = [
+  { key: "workout",   icon: "🏋️", title: "Workout History",  sub: "Exercises, sets, reps" },
+  { key: "nutrition", icon: "🍽️", title: "Nutrition Logs",   sub: "Meals, macros, calories" },
+  { key: "profile",   icon: "👤", title: "Profile Details",  sub: "Goals & settings" }
+];
+
+let orientation = "portrait";
+
+const MUSCLE_GROUP_COLORS = {
+  Chest:     "#e0473f",
+  Back:      "#4a90e2",
+  Legs:      "#8fd13f",
+  Shoulders: "#a259d9",
+  Arms:      "#f2c94c",
+  Core:      "#2fd1c5",
+  Other:     "#9a9a9a"
+};
+
+function guessMuscleGroup(name){
+  const n = (name || "").toLowerCase();
+  const rules = [
+    [/bench|chest|fly|pec|push[- ]?up/, "Chest"],
+    [/row|pull[- ]?up|lat|deadlift|back/, "Back"],
+    [/squat|leg|lunge|calf|hamstring|quad|glute/, "Legs"],
+    [/shoulder|delt|overhead press|military press|lateral raise/, "Shoulders"],
+    [/curl|tricep|bicep|forearm/, "Arms"],
+    [/plank|crunch|ab|core|sit[- ]?up/, "Core"]
+  ];
+  for (const [pattern, group] of rules) {
+    if (pattern.test(n)) return group;
+  }
+  return "Other";
+}
+
+function computeMuscleDistribution(exercises){
+  if (!Array.isArray(exercises) || exercises.length === 0) return [];
+  const setsByGroup = {};
+  let totalSets = 0;
+  exercises.forEach(ex => {
+    const group = ex.muscle || ex.muscleGroup || guessMuscleGroup(ex.name);
+    const sets = Number(ex.sets) || 0;
+    setsByGroup[group] = (setsByGroup[group] || 0) + sets;
+    totalSets += sets;
+  });
+  if (totalSets === 0) return [];
+  return Object.entries(setsByGroup)
+    .sort((a, b) => b[1] - a[1])
+    .map(([label, sets]) => ({
+      label,
+      pct: Math.round((sets / totalSets) * 100),
+      color: MUSCLE_GROUP_COLORS[label] || MUSCLE_GROUP_COLORS.Other
+    }));
+}
+
+function loadData(){
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch(e){ console.error(e); }
+  return {};
+}
+
+function describeDonutSegment(cx, cy, rOuter, rInner, startAngle, endAngle, color){
+  const largeArc = (endAngle - startAngle) > 180 ? 1 : 0;
+  const p = (r, a) => {
+    const rad = a * Math.PI / 180;
+    return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) };
+  };
+  const p1 = p(rOuter, startAngle), p2 = p(rOuter, endAngle);
+  const p3 = p(rInner, endAngle), p4 = p(rInner, startAngle);
+  return `<path d="M ${p1.x} ${p1.y} A ${rOuter} ${rOuter} 0 ${largeArc} 1 ${p2.x} ${p2.y} L ${p3.x} ${p3.y} A ${rInner} ${rInner} 0 ${largeArc} 0 ${p4.x} ${p4.y} Z" fill="${color}"/>`;
+}
+
+function renderOrientToggle(){
+  const wrap = document.getElementById("orientToggle");
+  wrap.querySelectorAll(".orient-btn").forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.orient === orientation);
+  });
+}
+
+function renderIncludeList(){
+  const wrap = document.getElementById("includeList");
+  wrap.innerHTML = INCLUDE_ITEMS.map(item => `
+    <div class="include-item" data-key="${item.key}">
+      <div class="check-box ${include[item.key] ? "checked" : ""}">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 12.5l4.5 4.5L19 7" stroke="#122007" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="include-icon">${item.icon}</div>
+      <div class="include-info">
+        <div class="include-title">${item.title}</div>
+        <div class="include-sub">${item.sub}</div>
+      </div>
+    </div>
+  `).join("");
+
+  wrap.querySelectorAll(".include-item").forEach(el => {
+    el.addEventListener("click", () => {
+      const key = el.dataset.key;
+      include[key] = !include[key];
+      renderIncludeList();
+      renderPreview();
+    });
+  });
+}
+
+function renderPreview(){
+  const data = loadData();
+  const user = data.user || {};
+  const unit = user.unit === "Imperial" ? "lb" : "kg";
+  const name = user.name || "User";
+  const weight = user.weight != null ? user.weight : "—";
+  const today = new Date();
+  const dateStr = today.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+
+  const avatarHtml = (user.image && user.image.startsWith("data:image"))
+    ? `<img class="rp-avatar" src="${user.image}" alt="">`
+    : `<div class="rp-avatar-fallback">${name.charAt(0).toUpperCase()}</div>`;
+
+  let html = `
+    <div class="rp-head">
+      <div>
+        <div class="rp-brand">GYM <span class="accent">TRACKER</span></div>
+        <div class="rp-tagline">Fitness Progress Report</div>
+      </div>
+      <div class="rp-head-right">
+        <div class="rp-date">
+          <div class="rp-user-name">${name}</div>
+          <div class="rp-date-sub">As of ${dateStr}</div>
+        </div>
+        ${avatarHtml}
+      </div>
+    </div>
+
+    <div class="rp-weight-card">
+      <div class="rp-weight-label">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6.5 6.5h11a1 1 0 011 1.2l-1.6 8a1 1 0 01-1 .8H8.1a1 1 0 01-1-.8l-1.6-8a1 1 0 011-1.2z"/></svg>
+        Current Weight
+      </div>
+      <div class="rp-weight-value">${weight}<span>${unit}</span></div>
+    </div>
+
+    <div class="rp-cards-grid">
+  `;
+
+  if (include.nutrition){
+    const nToday = (data.nutrition && data.nutrition.today) || { calories:0, protein:0, carbs:0, fats:0 };
+    const goals = data.goals || { calories:2400, protein:160, carbs:250, fats:70 };
+
+    const pCal = nToday.protein * 4, cCal = nToday.carbs * 4, fCal = nToday.fats * 9;
+    const totalCal = pCal + cCal + fCal;
+    const macroSegs = totalCal > 0 ? [
+      { label:"Protein", pct: Math.round((pCal/totalCal)*100), color:"#8fd13f" },
+      { label:"Carbs",   pct: Math.round((cCal/totalCal)*100), color:"#4a90e2" },
+      { label:"Fats",    pct: Math.round((fCal/totalCal)*100), color:"#f2c94c" }
+    ] : [];
+
+    let donutPaths = "";
+    let startAngle = -90;
+    macroSegs.forEach(seg => {
+      const angle = (seg.pct/100)*360;
+      donutPaths += describeDonutSegment(70,70,55,34,startAngle,startAngle+angle,seg.color);
+      startAngle += angle;
+    });
+
+    html += `
+      <div class="rp-card">
+        <div class="rp-card-title">🥗 Macro Breakdown</div>
+        ${macroSegs.length ? `
+          <div class="donut-row">
+            <svg width="110" height="110" viewBox="0 0 140 140">
+              ${donutPaths}
+              <circle cx="70" cy="70" r="32" fill="#101010"/>
+              <text x="70" y="66" text-anchor="middle" font-size="18" font-weight="800" fill="#f5f5f5">${Math.round(nToday.calories)}</text>
+              <text x="70" y="82" text-anchor="middle" font-size="10" fill="#9a9a9a">kcal</text>
+            </svg>
+            <div class="legend">
+              ${macroSegs.map(s => `
+                <div class="legend-item">
+                  <span class="sw" style="background:${s.color}"></span>
+                  <span class="lname">${s.label}</span>
+                  <span class="lval">${s.pct}%</span>
+                </div>
+              `).join("")}
+            </div>
+          </div>
+        ` : `<div class="rp-empty">No meals logged today.</div>`}
+      </div>
+
+      <div class="rp-card">
+        <div class="rp-card-title">📊 Today's Nutrition</div>
+        ${["calories","protein","carbs","fats"].map(key => {
+          const labels = { calories:"Calories", protein:"Protein", carbs:"Carbs", fats:"Fats" };
+          const units = { calories:"kcal", protein:"g", carbs:"g", fats:"g" };
+          const val = nToday[key] || 0;
+          const goal = goals[key] || 1;
+          const pct = Math.min(100, (val/goal)*100);
+          return `
+            <div class="bar-row">
+              <div class="bar-row-head"><span>${labels[key]}</span><b>${Math.round(val*10)/10} / ${goal} ${units[key]}</b></div>
+              <div class="bar-track"><span class="bar-fill" style="width:${pct}%"></span></div>
+            </div>
+          `;
+        }).join("")}
+      </div>
+    `;
+  }
+
+  if (include.workout){
+    const workout = data.activeWorkout || { name:"No Routine Set", exercises: [] };
+    const distribution = computeMuscleDistribution(workout.exercises);
+
+    html += `
+      <div class="rp-card">
+        <div class="rp-card-title">🏋️ Today's Workout — ${workout.name}</div>
+        ${workout.exercises && workout.exercises.length ? workout.exercises.map(ex => `
+          <div class="rp-ex-item">
+            <span class="rp-ex-name">${ex.name}</span>
+            <span class="rp-ex-detail">${ex.sets} × ${ex.reps}</span>
+          </div>
+        `).join("") : `<div class="rp-empty">No exercises added yet.</div>`}
+      </div>
+
+      <div class="rp-card">
+        <div class="rp-card-title">💪 Muscle Group Distribution</div>
+        ${distribution.length ? `
+          <div class="muscle-bar">
+            ${distribution.map(seg => `<span style="width:${seg.pct}%;background:${seg.color}"></span>`).join("")}
+          </div>
+          <div class="muscle-legend">
+            ${distribution.map(seg => `
+              <div class="muscle-legend-item">
+                <span class="sw" style="background:${seg.color}"></span>
+                ${seg.label} <b>${seg.pct}%</b>
+              </div>
+            `).join("")}
+          </div>
+        ` : `<div class="rp-empty">No exercises to analyze.</div>`}
+      </div>
+    `;
+  }
+
+  if (include.profile){
+    const goals = data.goals || { calories:2400, protein:160, carbs:250, fats:70 };
+    html += `
+      <div class="rp-card">
+        <div class="rp-card-title">👤 Profile Details</div>
+        <div class="rp-profile-row"><span>Name</span><span>${name}</span></div>
+        <div class="rp-profile-row"><span>Weight</span><span>${weight} ${unit}</span></div>
+        <div class="rp-profile-row"><span>Height</span><span>${user.height != null ? user.height : "—"} ${user.unit === "Imperial" ? "ft" : "cm"}</span></div>
+        <div class="rp-profile-row"><span>Units</span><span>${user.unit || "Metric"}</span></div>
+        <div class="rp-profile-row"><span>Daily Calorie Goal</span><span>${goals.calories} kcal</span></div>
+        <div class="rp-profile-row"><span>Protein Goal</span><span>${goals.protein} g</span></div>
+      </div>
+    `;
+  }
+
+  html += `</div>`;
+
+  const preview = document.getElementById("reportPreview");
+  preview.innerHTML = html;
+  preview.classList.toggle("landscape", orientation === "landscape");
+}
+
+function setPrintPage(){
+  let styleTag = document.getElementById("dynamicPageSize");
+  if (!styleTag){
+    styleTag = document.createElement("style");
+    styleTag.id = "dynamicPageSize";
+    document.head.appendChild(styleTag);
+  }
+  styleTag.textContent = `@page{ size: A4 ${orientation}; margin: 0; }`;
+}
+
+document.getElementById("orientToggle").addEventListener("click", (e) => {
+  const btn = e.target.closest(".orient-btn");
+  if (!btn) return;
+  orientation = btn.dataset.orient;
+  renderOrientToggle();
+  renderPreview();
+});
+
+document.getElementById("exportBtn").addEventListener("click", () => {
+  if (!include.workout && !include.nutrition && !include.profile){
+    showToast("Select at least one section to export");
+    return;
+  }
+  setPrintPage();
+  window.print();
+});
+
+function showToast(msg){
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 2000);
+}
+
+renderOrientToggle();
+renderIncludeList();
+renderPreview();
+</script>
+</body>
+</html>

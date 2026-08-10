@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<title>Gym Tracker — Workouts</title>
+<style>
+  :root{
+    --bg:#0a0a0a;
+    --card:#151515;
+    --card-border:#232323;
+    --text:#f5f5f5;
+    --muted:#9a9a9a;
+    --green:#8fd13f;
+    --blue:#4a90e2;
+    --red:#e0473f;
+    --purple:#a259d9;
+    --yellow:#f2c94c;
+    --radius-lg:18px;
+    --radius-md:14px;
+    --radius-sm:10px;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:"Inter","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    display:flex;
+    justify-content:center;
+  }
+
+  .app {
+    width: 100%;
+    max-width: 430px;
+    min-height: 100vh;
+    background: var(--bg);
+    padding: 70px 18px 90px;
+    position: relative;
+  }
+
+  a{color:inherit;text-decoration:none;}
+  button{font-family:inherit;}
+
+  /* Header */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: fixed;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 430px;
+    z-index: 100;
+    padding: 12px 18px;
+    background: var(--bg);
+    box-shadow: 0 8px 20px rgba(0,0,0,.3);
+    border-bottom: 1px solid var(--card-border);
+  }
+  .back-btn{
+    background:none;
+    border:none;
+    color:var(--text);
+    cursor:pointer;
+    padding:6px;
+    display:flex;
+  }
+  .brand{
+    display:flex;
+    flex-direction:column;
+    line-height:1.05;
+    font-weight:800;
+    letter-spacing:.5px;
+    font-size:15px;
+    text-align:center;
+  }
+  .brand .accent{color:var(--green);}
+  .spacer34{width:34px;}
+
+  h1.page-title{
+    font-size:26px;
+    margin:0 0 4px;
+    font-weight:800;
+  }
+  .subtext{
+    color:var(--muted);
+    font-size:13px;
+    margin:0 0 18px;
+  }
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--card-border);
+    border-radius:var(--radius-lg);
+    padding:16px;
+    margin-bottom:14px;
+  }
+
+  .card-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:12px;
+  }
+  .card-head-left{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-weight:700;
+    font-size:15px;
+  }
+  .pill{
+    background:#1c2c14;
+    color:var(--green);
+    font-size:11px;
+    font-weight:700;
+    padding:4px 10px;
+    border-radius:20px;
+  }
+
+  .btn-primary{
+    width:100%;
+    background:var(--green);
+    color:#122007;
+    border:none;
+    padding:13px;
+    border-radius:12px;
+    font-weight:700;
+    font-size:14.5px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    cursor:pointer;
+    margin-top:10px;
+  }
+  .btn-primary:active{filter:brightness(.92);}
+
+  .btn-secondary{
+    width:100%;
+    background:#1f1f1f;
+    color:var(--text);
+    border:1px solid var(--card-border);
+    padding:12px;
+    border-radius:12px;
+    font-weight:700;
+    font-size:14px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    cursor:pointer;
+    margin-top:8px;
+  }
+
+  .ex-item{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:10px 0;
+    border-top:1px solid #202020;
+  }
+  .ex-item:first-of-type{border-top:none;}
+  .ex-title{font-size:14px;font-weight:700;}
+  .ex-sub{font-size:12px;color:var(--muted);margin-top:2px;}
+
+  .del-btn{
+    background:none;
+    border:none;
+    color:#5a5a5a;
+    cursor:pointer;
+    padding:4px;
+  }
+  .del-btn:hover{color:var(--red);}
+
+  /* Bottom Nav */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 430px;
+    background: #0a0a0a;
+    border-top: 1px solid var(--card-border);
+    display: flex;
+    justify-content: space-around;
+    padding: 10px 4px 14px;
+    z-index: 100;
+  }
+  .nav-item{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:4px;
+    color:var(--muted);
+    font-size:10.5px;
+    font-weight:600;
+    cursor:pointer;
+  }
+  .nav-item.active{color:var(--green);}
+  .nav-item svg{width:21px;height:21px;}
+
+  .toast{
+    position:fixed;
+    bottom:80px;left:50%;
+    transform:translateX(-50%) translateY(20px);
+    background:#1c2c14;
+    color:var(--green);
+    border:1px solid #2e4a1c;
+    padding:10px 18px;
+    border-radius:30px;
+    font-size:13px;
+    font-weight:600;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .25s ease, transform .25s ease;
+    z-index:500;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="topbar">
+    <a class="back-btn" href="index.html" aria-label="Back to dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </a>
+    <div class="brand">
+      <span>GYM</span>
+      <span class="accent">TRACKER</span>
+    </div>
+    <div class="spacer34"></div>
+  </div>
+
+  <h1 class="page-title">Workouts</h1>
+  <p class="subtext">Track your sets, reps, and active session progress.</p>
+
+  <div class="card">
+    <div class="card-head">
+      <div class="card-head-left" id="routineName">🏋️ Today's Routine</div>
+      <span class="pill" id="exerciseCount">0 exercises</span>
+    </div>
+
+    <div id="workoutList">
+      <!-- Exercises list rendered here -->
+    </div>
+
+    <a class="btn-secondary" href="exercises.html">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+      Browse & Add Exercises
+    </a>
+
+    <button class="btn-primary" id="startWorkoutBtn" onclick="toggleActiveSession()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 4l14 8-14 8V4z"/></svg>
+      <span id="startBtnText">Start Workout Session</span>
+    </button>
+  </div>
+
+</div>
+
+<nav class="bottom-nav">
+  <a class="nav-item" href="index.html">
+    <svg viewBox="0 0 24 24" fill="none"><path d="M4 11l8-7 8 7v9a1 1 0 01-1 1h-4v-6H9v6H5a1 1 0 01-1-1v-9z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+    Dashboard
+  </a>
+  <a class="nav-item active" href="workouts.html">
+    <svg viewBox="0 0 24 24" fill="none"><path d="M6.5 6.5l11 11M4 9l3-3M17 20l3-3M2 12l2-2M20 14l2-2M7 5l2-2M15 21l2-2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+    Workouts
+  </a>
+  <a class="nav-item" href="exercises.html">
+    <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="6" r="2" stroke="currentColor" stroke-width="1.8"/><path d="M12 8v6M9 12h6M9 21l3-7 3 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Exercises
+  </a>
+  <a class="nav-item" href="macros.html">
+    <svg viewBox="0 0 24 24" fill="none"><path d="M6 3v9a2 2 0 002 2h0a2 2 0 002-2V3M8 14v7M18 3c-2 1-3 3-3 6s1 5 3 6M18 3v18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Nutrition
+  </a>
+  <a class="nav-item" href="settings.html">
+    <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M19.4 15a1.7 1.7 0 00.3 1.9l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.9-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1-1.6 1.7 1.7 0 00-1.9.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.9 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1 1.7 1.7 0 00-.3-1.9l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.9.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.9-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.9V9a1.7 1.7 0 001.5 1h.1a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+    Settings
+  </a>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const STORAGE_KEY = 'gymTrackerData';
+let isSessionActive = false;
+
+function loadWorkoutData() {
+  let defaultWorkout = {
+    name: "Push Day Routine",
+    durationMin: 60,
+    exercises: [
+      { id: 1, name: "Bench Press", sets: 4, reps: "8–10", muscle: "Chest" },
+      { id: 2, name: "Incline Dumbbell Press", sets: 3, reps: "10–12", muscle: "Chest" },
+      { id: 3, name: "Shoulder Press", sets: 3, reps: "10–12", muscle: "Shoulders" },
+      { id: 4, name: "Tricep Pushdown", sets: 3, reps: "12–15", muscle: "Arms" }
+    ]
+  };
+
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed.activeWorkout && parsed.activeWorkout.exercises) {
+        return parsed.activeWorkout;
+      }
+    }
+  } catch (e) {
+    console.error(e);
+  }
+  return defaultWorkout;
+}
+
+let activeWorkout = loadWorkoutData();
+
+// Check URL params for newly added exercises from exercise page
+const urlParams = new URLSearchParams(window.location.search);
+const addExParam = urlParams.get('add');
+const muscleParam = urlParams.get('muscle');
+if (addExParam) {
+  const exists = activeWorkout.exercises.find(e => e.name.toLowerCase() === addExParam.toLowerCase());
+  if (!exists) {
+    activeWorkout.exercises.push({
+      id: Date.now(),
+      name: addExParam,
+      sets: 3,
+      reps: "10–12",
+      muscle: muscleParam || "General"
+    });
+    saveWorkout();
+    showToast(`Added ${addExParam} to workout!`);
+  } else {
+    showToast(`${addExParam} is already in workout!`);
+  }
+  // clean query param
+  window.history.replaceState({}, document.title, window.location.pathname);
+}
+
+function saveWorkout() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    let data = raw ? JSON.parse(raw) : {};
+    data.activeWorkout = activeWorkout;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch(e) {
+    console.error(e);
+  }
+}
+
+function renderWorkout() {
+  document.getElementById("routineName").textContent = `🏋️ ${activeWorkout.name}`;
+  document.getElementById("exerciseCount").textContent = `${activeWorkout.exercises.length} exercises`;
+
+  const list = document.getElementById("workoutList");
+  if (!activeWorkout.exercises.length) {
+    list.innerHTML = `<div style="text-align:center;color:var(--muted);padding:20px 0;font-size:13px;">No exercises added yet. Tap 'Browse & Add Exercises' to customize your routine!</div>`;
+    return;
+  }
+
+  list.innerHTML = activeWorkout.exercises.map(ex => `
+    <div class="ex-item">
+      <div>
+        <div class="ex-title">${ex.name}</div>
+        <div class="ex-sub">${ex.sets} sets × ${ex.reps} reps · <span style="color:var(--green)">${ex.muscle}</span></div>
+      </div>
+      <button class="del-btn" onclick="removeEx(${ex.id})" aria-label="Remove exercise">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+  `).join("");
+}
+
+function removeEx(id) {
+  activeWorkout.exercises = activeWorkout.exercises.filter(e => e.id !== id);
+  saveWorkout();
+  renderWorkout();
+  showToast("Exercise removed from routine");
+}
+
+function toggleActiveSession() {
+  isSessionActive = !isSessionActive;
+  const btnText = document.getElementById("startBtnText");
+  const btn = document.getElementById("startWorkoutBtn");
+  if (isSessionActive) {
+    btnText.textContent = "Finish Workout Session";
+    btn.style.background = "var(--red)";
+    btn.style.color = "#fff";
+    showToast("Workout session started! 🔥");
+  } else {
+    btnText.textContent = "Start Workout Session";
+    btn.style.background = "var(--green)";
+    btn.style.color = "#122007";
+    showToast("Workout session completed & saved! 🎉");
+  }
+}
+
+function showToast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 2000);
+}
+
+renderWorkout();
+</script>
+</body>
+</html>

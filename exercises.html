@@ -1,0 +1,1446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<title>Gym Tracker — Exercises</title>
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --card: #151515;
+    --card-border: #232323;
+    --text: #f5f5f5;
+    --muted: #9a9a9a;
+    --green: #8fd13f;
+    --green-dark: #5e8f2a;
+    --blue: #4a90e2;
+    --red: #e0473f;
+    --purple: #a259d9;
+    --yellow: #f2c94c;
+    --teal: #2fd1c5;
+    --orange: #f2843c;
+    --radius-lg: 18px;
+    --radius-md: 14px;
+    --radius-sm: 10px;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    display: flex;
+    justify-content: center;
+  }
+
+  /* App Shell */
+  .app {
+    width: 100%;
+    max-width: 430px;
+    min-height: 100vh;
+    background: var(--bg);
+    padding: 70px 18px 95px;
+    position: relative;
+  }
+
+  a { color: inherit; text-decoration: none; }
+  button, input, select { font-family: inherit; }
+
+  /* Header */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: fixed;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 430px;
+    z-index: 100;
+    padding: 12px 18px;
+    background: var(--bg);
+    box-shadow: 0 8px 20px rgba(0,0,0,.3);
+    border-bottom: 1px solid var(--card-border);
+  }
+
+  .back-btn {
+    background: none;
+    border: none;
+    color: var(--text);
+    cursor: pointer;
+    padding: 6px;
+    display: flex;
+    align-items: center;
+  }
+
+  .brand {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.05;
+    font-weight: 800;
+    letter-spacing: .5px;
+    font-size: 15px;
+    text-align: center;
+  }
+  .brand .accent { color: var(--green); }
+
+  .add-custom-btn {
+    background: #1c2c14;
+    color: var(--green);
+    border: 1px solid #2e4a1c;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  h1.page-title {
+    font-size: 26px;
+    margin: 0 0 4px;
+    font-weight: 800;
+  }
+
+  .subtext {
+    color: var(--muted);
+    font-size: 13px;
+    margin: 0 0 16px;
+  }
+
+  /* Search & Filter Controls */
+  .search-wrap {
+    position: relative;
+    margin-bottom: 14px;
+  }
+
+  .search-input {
+    width: 100%;
+    background: #131313;
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 12px 14px 12px 40px;
+    color: var(--text);
+    font-size: 14px;
+    outline: none;
+    transition: border-color .2s ease;
+  }
+
+  .search-input:focus {
+    border-color: var(--green);
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    pointer-events: none;
+  }
+
+  .clear-search {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: none;
+  }
+  .clear-search.show { display: block; }
+
+  /* Muscle Category Scroll */
+  .category-scroll {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 6px;
+    margin-bottom: 14px;
+    scrollbar-width: none;
+  }
+  .category-scroll::-webkit-scrollbar { display: none; }
+
+  .cat-chip {
+    background: #141414;
+    border: 1px solid var(--card-border);
+    color: var(--muted);
+    font-size: 12.5px;
+    font-weight: 600;
+    padding: 7px 14px;
+    border-radius: 20px;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all .2s ease;
+  }
+
+  .cat-chip.active {
+    background: var(--green);
+    color: #101d06;
+    border-color: var(--green);
+    font-weight: 700;
+  }
+
+  /* Sub Filter Selectors */
+  .filter-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .filter-select {
+    flex: 1;
+    background: #121212;
+    border: 1px solid var(--card-border);
+    color: var(--text);
+    padding: 8px 10px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 600;
+    outline: none;
+  }
+
+  .fav-toggle {
+    background: #121212;
+    border: 1px solid var(--card-border);
+    color: var(--muted);
+    padding: 8px 12px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+  }
+  .fav-toggle.active {
+    background: #2a220a;
+    border-color: var(--yellow);
+    color: var(--yellow);
+  }
+
+  /* Exercise List Grid */
+  .exercise-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .ex-card {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-lg);
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    cursor: pointer;
+    transition: transform .15s ease, border-color .15s ease;
+    position: relative;
+  }
+
+  .ex-card:active {
+    transform: scale(0.99);
+  }
+
+  .ex-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .ex-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .ex-icon-box {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: #1f1f1f;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+    border: 1px solid #2a2a2a;
+  }
+
+  .ex-name-text {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0 0 3px;
+  }
+
+  .ex-target-sub {
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .fav-btn {
+    background: none;
+    border: none;
+    color: #4a4a4a;
+    cursor: pointer;
+    padding: 4px;
+    transition: color .2s ease;
+  }
+
+  .fav-btn.is-fav {
+    color: var(--yellow);
+  }
+
+  .ex-tags {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .tag {
+    font-size: 10.5px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 6px;
+    text-transform: uppercase;
+    letter-spacing: .3px;
+  }
+
+  .tag.muscle {
+    background: #1c2c14;
+    color: var(--green);
+  }
+
+  .tag.equipment {
+    background: #122030;
+    color: var(--blue);
+  }
+
+  .tag.difficulty {
+    background: #231d2b;
+    color: var(--purple);
+  }
+
+  .ex-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid #202020;
+    padding-top: 10px;
+    margin-top: 2px;
+  }
+
+  .ex-info-item {
+    font-size: 11.5px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .add-workout-btn {
+    background: var(--green);
+    color: #122007;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 11.5px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .add-workout-btn:active { filter: brightness(0.9); }
+
+  /* Empty State */
+  .empty-state {
+    text-align: center;
+    padding: 40px 10px;
+    color: var(--muted);
+  }
+  .empty-state svg {
+    margin-bottom: 12px;
+    color: #333;
+  }
+
+  /* Modal Drawer for Details & Custom Exercise */
+  .modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.8);
+    backdrop-filter: blur(6px);
+    z-index: 200;
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+  }
+
+  .modal-backdrop.open {
+    display: flex;
+  }
+
+  .modal-sheet {
+    background: #141414;
+    border-top: 1px solid var(--card-border);
+    border-radius: 22px 22px 0 0;
+    width: 100%;
+    max-width: 430px;
+    max-height: 85vh;
+    overflow-y: auto;
+    padding: 20px;
+    position: relative;
+    animation: slideUp .25s ease-out;
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+
+  .modal-handle {
+    width: 36px;
+    height: 4px;
+    background: #333;
+    border-radius: 2px;
+    margin: 0 auto 16px;
+  }
+
+  .modal-close-btn {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    background: #222;
+    border: none;
+    color: var(--muted);
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-title {
+    font-size: 20px;
+    font-weight: 800;
+    margin: 0 0 6px;
+  }
+
+  .modal-sub {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+
+  .step-list {
+    margin: 12px 0;
+    padding-left: 20px;
+  }
+  .step-list li {
+    font-size: 13.5px;
+    color: #d0d0d0;
+    margin-bottom: 8px;
+    line-height: 1.4;
+  }
+
+  .tip-box {
+    background: #132210;
+    border: 1px solid #28441d;
+    border-radius: 12px;
+    padding: 12px;
+    margin: 14px 0;
+    font-size: 12.5px;
+    color: #c3e2af;
+  }
+  .tip-box b { color: var(--green); display: block; margin-bottom: 4px; }
+
+  /* Form inputs for Custom Exercise */
+  .form-group {
+    margin-bottom: 14px;
+  }
+  .form-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--muted);
+    margin-bottom: 6px;
+    display: block;
+    text-transform: uppercase;
+  }
+  .form-input, .form-select, .form-textarea {
+    width: 100%;
+    background: #0a0a0a;
+    border: 1px solid var(--card-border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    color: var(--text);
+    font-size: 13.5px;
+    outline: none;
+  }
+  .form-input:focus, .form-select:focus, .form-textarea:focus {
+    border-color: var(--green);
+  }
+
+  /* Bottom Nav */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 430px;
+    background: #0a0a0a;
+    border-top: 1px solid var(--card-border);
+    display: flex;
+    justify-content: space-around;
+    padding: 10px 4px 14px;
+    z-index: 100;
+  }
+  .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    color: var(--muted);
+    font-size: 10.5px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .nav-item.active { color: var(--green); }
+  .nav-item svg { width: 21px; height: 21px; }
+
+  /* Toast Notification */
+  .toast {
+    position: fixed;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: #1c2c14;
+    color: var(--green);
+    border: 1px solid #2e4a1c;
+    padding: 10px 18px;
+    border-radius: 30px;
+    font-size: 13px;
+    font-weight: 600;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .25s ease, transform .25s ease;
+    z-index: 500;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ============ HEADER ============ -->
+  <div class="topbar">
+    <a class="back-btn" href="index.html" aria-label="Back to dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </a>
+    <div class="brand">
+      <span>GYM</span>
+      <span class="accent">TRACKER</span>
+    </div>
+    <button class="add-custom-btn" id="openCustomModal">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+      Add Custom
+    </button>
+  </div>
+
+  <!-- ============ PAGE HEADING ============ -->
+  <h1 class="page-title">Exercise Library</h1>
+  <p class="subtext">Browse exercises, learn proper form, and build your routine.</p>
+
+  <!-- ============ SEARCH BAR ============ -->
+  <div class="search-wrap">
+    <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+    <input type="text" id="searchInput" class="search-input" placeholder="Search exercises (e.g., Bench Press, Squat)..." />
+    <button class="clear-search" id="clearSearchBtn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+
+  <!-- ============ MUSCLE CATEGORY CHIPS ============ -->
+  <div class="category-scroll" id="categoryScroll">
+    <button class="cat-chip active" data-cat="All">All Muscles</button>
+    <button class="cat-chip" data-cat="Chest">Chest</button>
+    <button class="cat-chip" data-cat="Back">Back</button>
+    <button class="cat-chip" data-cat="Legs">Legs</button>
+    <button class="cat-chip" data-cat="Shoulders">Shoulders</button>
+    <button class="cat-chip" data-cat="Arms">Arms</button>
+    <button class="cat-chip" data-cat="Core">Core</button>
+    <button class="cat-chip" data-cat="Cardio">Cardio</button>
+  </div>
+
+  <!-- ============ SUB-FILTER ROW ============ -->
+  <div class="filter-row">
+    <select id="equipmentFilter" class="filter-select">
+      <option value="All">All Equipment</option>
+      <option value="Barbell">Barbell</option>
+      <option value="Dumbbell">Dumbbell</option>
+      <option value="Machine">Machine</option>
+      <option value="Cable">Cable</option>
+      <option value="Bodyweight">Bodyweight</option>
+    </select>
+
+    <select id="difficultyFilter" class="filter-select">
+      <option value="All">All Levels</option>
+      <option value="Beginner">Beginner</option>
+      <option value="Intermediate">Intermediate</option>
+      <option value="Advanced">Advanced</option>
+    </select>
+
+    <button id="favToggleBtn" class="fav-toggle">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      Favs
+    </button>
+  </div>
+
+  <!-- ============ EXERCISE LIST ============ -->
+  <div class="exercise-list" id="exerciseList">
+    <!-- Rendered via JS -->
+  </div>
+
+</div>
+
+<!-- ============ BOTTOM NAV ============ -->
+<nav class="bottom-nav">
+  <a class="nav-item" href="index.html">
+    <svg viewBox="0 0 24 24" fill="none"><path d="M4 11l8-7 8 7v9a1 1 0 01-1 1h-4v-6H9v6H5a1 1 0 01-1-1v-9z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+    Dashboard
+  </a>
+  <a class="nav-item" href="workouts.html">
+    <svg viewBox="0 0 24 24" fill="none"><path d="M6.5 6.5l11 11M4 9l3-3M17 20l3-3M2 12l2-2M20 14l2-2M7 5l2-2M15 21l2-2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+    Workouts
+  </a>
+  <a class="nav-item active" href="exercises.html">
+    <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="6" r="2" stroke="currentColor" stroke-width="1.8"/><path d="M12 8v6M9 12h6M9 21l3-7 3 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Exercises
+  </a>
+  <a class="nav-item" href="macros.html">
+    <svg viewBox="0 0 24 24" fill="none"><path d="M6 3v9a2 2 0 002 2h0a2 2 0 002-2V3M8 14v7M18 3c-2 1-3 3-3 6s1 5 3 6M18 3v18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Nutrition
+  </a>
+  <a class="nav-item" href="settings.html">
+    <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M19.4 15a1.7 1.7 0 00.3 1.9l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.9-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1-1.6 1.7 1.7 0 00-1.9.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.9 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1 1.7 1.7 0 00-.3-1.9l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.9.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.9-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.9V9a1.7 1.7 0 001.5 1h.1a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+    Settings
+  </a>
+</nav>
+
+<!-- ============ EXERCISE DETAILS MODAL ============ -->
+<div class="modal-backdrop" id="detailModal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <button class="modal-close-btn" id="closeDetailModal">✕</button>
+    <div id="modalDetailContent">
+      <!-- Filled via JS -->
+    </div>
+  </div>
+</div>
+
+<!-- ============ ADD CUSTOM EXERCISE MODAL ============ -->
+<div class="modal-backdrop" id="customModal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <button class="modal-close-btn" id="closeCustomModal">✕</button>
+    <div class="modal-title">Add Custom Exercise</div>
+    <div class="modal-sub">Create your own exercise to save in your library.</div>
+
+    <div class="form-group">
+      <label class="form-label">Exercise Name</label>
+      <input type="text" id="customName" class="form-input" placeholder="e.g. Incline Cable Fly" />
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Primary Muscle</label>
+      <select id="customMuscle" class="form-select">
+        <option>Chest</option>
+        <option>Back</option>
+        <option>Legs</option>
+        <option>Shoulders</option>
+        <option>Arms</option>
+        <option>Core</option>
+        <option>Cardio</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Equipment</label>
+      <select id="customEquipment" class="form-select">
+        <option>Barbell</option>
+        <option>Dumbbell</option>
+        <option>Machine</option>
+        <option>Cable</option>
+        <option>Bodyweight</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Difficulty</label>
+      <select id="customDifficulty" class="form-select">
+        <option>Beginner</option>
+        <option>Intermediate</option>
+        <option>Advanced</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Instructions / Notes</label>
+      <textarea id="customNotes" class="form-textarea" rows="3" placeholder="Key form cues or instructions..."></textarea>
+    </div>
+
+    <button class="add-workout-btn" id="saveCustomBtn" style="width:100%;padding:12px;font-size:14px;justify-content:center;margin-top:10px;">
+      Save Exercise
+    </button>
+  </div>
+</div>
+
+<div class="toast" id="toast">Added to workout!</div>
+
+<script>
+// ===== EXERCISE DATABASE =====
+const BASE_EXERCISES = [
+  // CHEST
+  {
+    id: 'bench-press',
+    name: 'Barbell Bench Press',
+    icon: '🏋️‍♂️',
+    muscle: 'Chest',
+    secondary: ['Triceps', 'Front Delts'],
+    equipment: 'Barbell',
+    difficulty: 'Intermediate',
+    setsReps: '4 sets × 8–10 reps',
+    steps: [
+      'Lie flat on the bench with feet firm on the floor.',
+      'Grip the bar slightly wider than shoulder-width with wrists straight.',
+      'Unrack and lower the bar slowly to mid-chest level.',
+      'Press explosively back up until arms are extended, squeezing the chest.'
+    ],
+    tip: 'Keep your shoulder blades retracted and depressed throughout the movement for shoulder health.',
+    mistake: 'Bouncing the bar off your chest or arching your lower back excessively.'
+  },
+  {
+    id: 'incline-db-press',
+    name: 'Incline Dumbbell Press',
+    icon: '🏋️‍♀️',
+    muscle: 'Chest',
+    secondary: ['Upper Chest', 'Triceps'],
+    equipment: 'Dumbbell',
+    difficulty: 'Intermediate',
+    setsReps: '3 sets × 10–12 reps',
+    steps: [
+      'Set bench to 30–45 degrees incline.',
+      'Hold dumbbells at chest height with palms facing forward.',
+      'Press upward until arms are straight without locking elbows.',
+      'Lower under control to feel a deep stretch in upper chest.'
+    ],
+    tip: 'Angle your elbows slightly inward at 45 degrees to protect shoulders.',
+    mistake: 'Setting the bench angle too steep, shifting focus onto front shoulders.'
+  },
+  {
+    id: 'push-up',
+    name: 'Standard Push-Up',
+    icon: '🧘‍♂️',
+    muscle: 'Chest',
+    secondary: ['Core', 'Triceps'],
+    equipment: 'Bodyweight',
+    difficulty: 'Beginner',
+    setsReps: '3 sets × 15–20 reps',
+    steps: [
+      'Place hands slightly wider than shoulder-width, body in a straight plank.',
+      'Lower chest until it almost touches the floor.',
+      'Keep core braced and push back up to starting position.'
+    ],
+    tip: 'Squeeze your glutes and abs to keep spine perfectly neutral.',
+    mistake: 'Flaring elbows straight out to 90 degrees or sagging hips.'
+  },
+  {
+    id: 'cable-crossover',
+    name: 'Cable Chest Fly',
+    icon: '⛓️',
+    muscle: 'Chest',
+    secondary: ['Inner Chest', 'Front Delts'],
+    equipment: 'Cable',
+    difficulty: 'Intermediate',
+    setsReps: '3 sets × 12–15 reps',
+    steps: [
+      'Set pulleys above shoulder height.',
+      'Step forward slightly, leaning with a slight bend in elbows.',
+      'Bring handles together in a hugging motion toward the center.',
+      'Pause for a second squeeze, then slowly return.'
+    ],
+    tip: 'Maintain constant tension on chest throughout the full range.',
+    mistake: 'Bending and extending elbows like a press instead of flying.'
+  },
+
+  // BACK
+  {
+    id: 'lat-pulldown',
+    name: 'Lat Pulldown',
+    icon: '🧗‍♂️',
+    muscle: 'Back',
+    secondary: ['Biceps', 'Rear Delts'],
+    equipment: 'Machine',
+    difficulty: 'Beginner',
+    setsReps: '4 sets × 10–12 reps',
+    steps: [
+      'Grip bar wider than shoulders, sit with thighs secured under pads.',
+      'Drive elbows down toward your hips, bringing bar to upper chest.',
+      'Squeeze lats at the bottom, then return under control.'
+    ],
+    tip: 'Focus on pulling with your elbows rather than yanking with hands.',
+    mistake: 'Leaning back excessively and swinging momentum.'
+  },
+  {
+    id: 'barbell-row',
+    name: 'Bent-Over Barbell Row',
+    icon: '🏋️',
+    muscle: 'Back',
+    secondary: ['Rhomboids', 'Lower Back', 'Biceps'],
+    equipment: 'Barbell',
+    difficulty: 'Intermediate',
+    setsReps: '4 sets × 8–10 reps',
+    steps: [
+      'Hinge at hips with knees bent, keeping torso nearly parallel to ground.',
+      'Pull bar toward lower stomach, squeezing shoulder blades together.',
+      'Lower bar with control without letting shoulders collapse forward.'
+    ],
+    tip: 'Keep neck in line with spine looking slightly ahead on ground.',
+    mistake: 'Rounding the spine or standing up straight during repetitions.'
+  },
+  {
+    id: 'pull-up',
+    name: 'Bodyweight Pull-Up',
+    icon: '🤸‍♂️',
+    muscle: 'Back',
+    secondary: ['Lats', 'Biceps', 'Core'],
+    equipment: 'Bodyweight',
+    difficulty: 'Advanced',
+    setsReps: '3 sets × 6–10 reps',
+    steps: [
+      'Hang from bar with overhand grip wider than shoulders.',
+      'Pull chest up to bar by driving elbows down toward ribcage.',
+      'Lower fully into a dead hang before starting next rep.'
+    ],
+    tip: 'Initiate the movement by depressing shoulder blades first.',
+    mistake: 'Kicking legs or half-repping without full range of motion.'
+  },
+  {
+    id: 'single-arm-db-row',
+    name: 'Single-Arm Dumbbell Row',
+    icon: '🏋️‍♀️',
+    muscle: 'Back',
+    secondary: ['Lats', 'Upper Back'],
+    equipment: 'Dumbbell',
+    difficulty: 'Beginner',
+    setsReps: '3 sets × 10–12 reps',
+    steps: [
+      'Place knee and hand on bench for stability.',
+      'Hold dumbbell with free hand, arm hanging straight down.',
+      'Pull dumbbell up toward hip crease, squeezing lat.',
+      'Lower slowly without twisting hips.'
+    ],
+    tip: 'Keep torso still; do not rotate shoulders upward to pull weight.',
+    mistake: 'Pulling weight toward chest instead of pulling back toward hip.'
+  },
+
+  // LEGS
+  {
+    id: 'barbell-squat',
+    name: 'Barbell Back Squat',
+    icon: '🦵',
+    muscle: 'Legs',
+    secondary: ['Quads', 'Glutes', 'Hamstrings', 'Core'],
+    equipment: 'Barbell',
+    difficulty: 'Advanced',
+    setsReps: '4 sets × 6–8 reps',
+    steps: [
+      'Rest bar across upper traps, feet shoulder-width apart.',
+      'Inhale deep, brace core, and bend knees to lower hips.',
+      'Squat down until thighs are parallel to floor or deeper.',
+      'Drive through heels and mid-foot to return standing.'
+    ],
+    tip: 'Keep knees tracking in line with toes, do not let them cave in.',
+    mistake: 'Rising hips faster than chest, turning squat into a good-morning.'
+  },
+  {
+    id: 'leg-press',
+    name: 'Leg Press Machine',
+    icon: '🦿',
+    muscle: 'Legs',
+    secondary: ['Quads', 'Glutes'],
+    equipment: 'Machine',
+    difficulty: 'Beginner',
+    setsReps: '3 sets × 12–15 reps',
+    steps: [
+      'Place feet hip-width apart on platform center.',
+      'Release safety handles and lower platform toward chest.',
+      'Stop when knees form 90 degrees, press platform back up.'
+    ],
+    tip: 'Keep lower back and glutes glued to seat throughout.',
+    mistake: 'Locking knees hard at top or letting lower back round at bottom.'
+  },
+  {
+    id: 'romanian-deadlift',
+    name: 'Romanian Deadlift (RDL)',
+    icon: '🏋️‍♂️',
+    muscle: 'Legs',
+    secondary: ['Hamstrings', 'Glutes', 'Lower Back'],
+    equipment: 'Barbell',
+    difficulty: 'Intermediate',
+    setsReps: '3 sets × 8–10 reps',
+    steps: [
+      'Stand holding bar at thigh height with soft knee bend.',
+      'Push hips back while lowering bar along shins until hamstring stretch.',
+      'Squeeze glutes and push hips forward to stand tall.'
+    ],
+    tip: 'Movement is a hip hinge backward, not a squat down.',
+    mistake: 'Rounding upper spine or bending knees too much.'
+  },
+  {
+    id: 'walking-lunges',
+    name: 'Dumbbell Walking Lunges',
+    icon: '🚶‍♂️',
+    muscle: 'Legs',
+    secondary: ['Quads', 'Glutes', 'Calves'],
+    equipment: 'Dumbbell',
+    difficulty: 'Intermediate',
+    setsReps: '3 sets × 12 reps per leg',
+    steps: [
+      'Hold dumbbells at sides, step forward with right leg.',
+      'Lower back knee until inches from floor, front knee at 90 degrees.',
+      'Drive through front heel to step forward into next lunge.'
+    ],
+    tip: 'Keep upright posture and core tight throughout walk.',
+    mistake: 'Letting front knee collapse inward or leaning too far forward.'
+  },
+
+  // SHOULDERS
+  {
+    id: 'overhead-press',
+    name: 'Overhead Barbell Press',
+    icon: '🗣️',
+    muscle: 'Shoulders',
+    secondary: ['Front Delts', 'Triceps', 'Upper Chest'],
+    equipment: 'Barbell',
+    difficulty: 'Intermediate',
+    setsReps: '4 sets × 8 reps',
+    steps: [
+      'Hold bar at clavicle level with shoulder-width grip.',
+      'Press bar straight up over head, moving head back slightly then forward as bar passes face.',
+      'Lock out arms over shoulders and lower under control.'
+    ],
+    tip: 'Squeeze glutes and brace core tight to prevent hyper-extending lower back.',
+    mistake: 'Turning overhead press into an incline press by leaning backward.'
+  },
+  {
+    id: 'db-lateral-raise',
+    name: 'Dumbbell Lateral Raise',
+    icon: '🦅',
+    muscle: 'Shoulders',
+    secondary: ['Side Delts'],
+    equipment: 'Dumbbell',
+    difficulty: 'Beginner',
+    setsReps: '3 sets × 12–15 reps',
+    steps: [
+      'Stand holding dumbbells at sides with slight elbow bend.',
+      'Raise arms out to sides until parallel with shoulder level.',
+      'Lower dumbbells slowly back down without swinging.'
+    ],
+    tip: 'Lead movement with elbows and pour pitcher slightly at top.',
+    mistake: 'Using heavy weight and swinging body momentum.'
+  },
+  {
+    id: 'face-pull',
+    name: 'Cable Face Pull',
+    icon: '🏹',
+    muscle: 'Shoulders',
+    secondary: ['Rear Delts', 'Rotator Cuff', 'Traps'],
+    equipment: 'Cable',
+    difficulty: 'Beginner',
+    setsReps: '3 sets × 15 reps',
+    steps: [
+      'Attach rope to high pulley, hold ends with thumbs pointing back.',
+      'Step back, pull rope toward nose while spreading handles apart.',
+      'Rotate shoulders outward at end range and pause.'
+    ],
+    tip: 'Essential exercise for posture and rear shoulder balance.',
+    mistake: 'Pulling to neck/chest instead of eye level.'
+  },
+
+  // ARMS
+  {
+    id: 'barbell-bicep-curl',
+    name: 'Barbell Bicep Curl',
+    icon: '💪',
+    muscle: 'Arms',
+    secondary: ['Biceps', 'Forearms'],
+    equipment: 'Barbell',
+    difficulty: 'Beginner',
+    setsReps: '3 sets × 10–12 reps',
+    steps: [
+      'Stand shoulder-width, hold bar with underhand grip.',
+      'Curl bar up toward chest while keeping upper arms pinned to sides.',
+      'Squeeze biceps at top, lower slowly to full arm extension.'
+    ],
+    tip: 'Keep elbows locked at sides; do not let them swing forward.',
+    mistake: 'Using hips and lower back to momentum weight up.'
+  },
+  {
+    id: 'tricep-rope-pushdown',
+    name: 'Cable Tricep Pushdown',
+    icon: '⚡',
+    muscle: 'Arms',
+    secondary: ['Triceps'],
+    equipment: 'Cable',
+    difficulty: 'Beginner',
+    setsReps: '3 sets × 12–15 reps',
+    steps: [
+      'Attach rope to top pulley, hold with palms facing each other.',
+      'Keep upper arms locked beside torso, push rope down.',
+      'Spread rope handles apart at bottom and squeeze triceps.',
+      'Return to 90 degree elbow bend under control.'
+    ],
+    tip: 'Avoid leaning over rope; stand upright with core engaged.',
+    mistake: 'Swinging elbows back and forth.'
+  },
+  {
+    id: 'hammer-curl',
+    name: 'Dumbbell Hammer Curl',
+    icon: '🔨',
+    muscle: 'Arms',
+    secondary: ['Brachialis', 'Forearms'],
+    equipment: 'Dumbbell',
+    difficulty: 'Beginner',
+    setsReps: '3 sets × 10–12 reps',
+    steps: [
+      'Hold dumbbells with neutral grip (palms facing each other).',
+      'Curl dumbbells up toward shoulders maintaining neutral grip.',
+      'Squeeze at top and lower under control.'
+    ],
+    tip: 'Builds thickness in arm and strength in forearm grip.',
+    mistake: 'Turning wrists into supination during curl.'
+  },
+
+  // CORE
+  {
+    id: 'hanging-leg-raise',
+    name: 'Hanging Leg Raise',
+    icon: '🧘',
+    muscle: 'Core',
+    secondary: ['Lower Abs', 'Hip Flexors'],
+    equipment: 'Bodyweight',
+    difficulty: 'Intermediate',
+    setsReps: '3 sets × 12–15 reps',
+    steps: [
+      'Hang from pull-up bar with straight arms and body.',
+      'Brace abs and raise straight legs (or bent knees) to 90 degrees.',
+      'Lower legs slowly without letting body swing.'
+    ],
+    tip: 'Curling pelvis slightly at top activates lower abdominal wall.',
+    mistake: 'Swinging body back and forth using momentum.'
+  },
+  {
+    id: 'ab-wheel-rollout',
+    name: 'Ab Wheel Rollout',
+    icon: '⚙️',
+    muscle: 'Core',
+    secondary: ['Abs', 'Lats', 'Shoulders'],
+    equipment: 'Bodyweight',
+    difficulty: 'Advanced',
+    setsReps: '3 sets × 8–12 reps',
+    steps: [
+      'Kneel on mat holding ab wheel on floor under shoulders.',
+      'Roll wheel forward extending arms and hips until body is flat.',
+      'Contract abs hard to pull wheel back to starting position.'
+    ],
+    tip: 'Keep lower back slightly rounded in hollow body hold.',
+    mistake: 'Letting lower back arch and sag down toward floor.'
+  },
+
+  // CARDIO
+  {
+    id: 'treadmill-sprint',
+    name: 'HIIT Treadmill Sprints',
+    icon: '🏃‍♂️',
+    muscle: 'Cardio',
+    secondary: ['Legs', 'Calves', 'Endurance'],
+    equipment: 'Machine',
+    difficulty: 'Intermediate',
+    setsReps: '10 rounds × 30s sprint / 30s walk',
+    steps: [
+      'Warm up with 3 minutes light jog.',
+      'Increase speed to 85-95% max effort for 30 seconds.',
+      'Straddle or lower speed for 30-45 seconds recovery.',
+      'Repeat for desired interval rounds.'
+    ],
+    tip: 'Maintain high knee drive and pump arms in rhythm.',
+    mistake: 'Jumping on high speed belt without grabbing handrails safely.'
+  },
+  {
+    id: 'rowing-machine',
+    name: 'Concept2 Rower Intervals',
+    icon: '🚣‍♂️',
+    muscle: 'Cardio',
+    secondary: ['Full Body', 'Back', 'Legs'],
+    equipment: 'Machine',
+    difficulty: 'Intermediate',
+    setsReps: '2000m row or 5 x 500m intervals',
+    steps: [
+      'Drive with legs first, lean back slightly, then pull handle to chest.',
+      'Extend arms, lean forward, then bend knees to return forward.',
+      'Maintain 60% legs, 20% core, 20% arms force ratio.'
+    ],
+    tip: 'Rowing is leg driven! Do not pull with arms first.',
+    mistake: 'Bending knees before arms have extended past knees on recovery.'
+  }
+];
+
+// LocalStorage Keys
+const STORAGE_KEY = 'gymTrackerData';
+const CUSTOM_EX_KEY = 'gymTrackerCustomExercises';
+const FAV_EX_KEY = 'gymTrackerFavExercises';
+
+// State
+let selectedCategory = 'All';
+let searchQuery = '';
+let selectedEquipment = 'All';
+let selectedDifficulty = 'All';
+let showFavsOnly = false;
+let favoriteIds = JSON.parse(localStorage.getItem(FAV_EX_KEY) || '[]');
+let customExercises = JSON.parse(localStorage.getItem(CUSTOM_EX_KEY) || '[]');
+
+// Merge Base + Custom Exercises
+function getAllExercises() {
+  return [...BASE_EXERCISES, ...customExercises];
+}
+
+// DOM Elements
+const searchInput = document.getElementById('searchInput');
+const clearSearchBtn = document.getElementById('clearSearchBtn');
+const categoryScroll = document.getElementById('categoryScroll');
+const equipmentFilter = document.getElementById('equipmentFilter');
+const difficultyFilter = document.getElementById('difficultyFilter');
+const favToggleBtn = document.getElementById('favToggleBtn');
+const exerciseList = document.getElementById('exerciseList');
+const detailModal = document.getElementById('detailModal');
+const closeDetailModal = document.getElementById('closeDetailModal');
+const modalDetailContent = document.getElementById('modalDetailContent');
+const customModal = document.getElementById('customModal');
+const openCustomModal = document.getElementById('openCustomModal');
+const closeCustomModal = document.getElementById('closeCustomModal');
+const saveCustomBtn = document.getElementById('saveCustomBtn');
+
+// Render Function
+function renderExercises() {
+  const all = getAllExercises();
+
+  const filtered = all.filter(ex => {
+    // Muscle category
+    if (selectedCategory !== 'All' && ex.muscle.toLowerCase() !== selectedCategory.toLowerCase()) {
+      return false;
+    }
+    // Search query
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      const matchName = ex.name.toLowerCase().includes(q);
+      const matchMuscle = ex.muscle.toLowerCase().includes(q);
+      const matchEquip = ex.equipment.toLowerCase().includes(q);
+      if (!matchName && !matchMuscle && !matchEquip) return false;
+    }
+    // Equipment
+    if (selectedEquipment !== 'All' && ex.equipment.toLowerCase() !== selectedEquipment.toLowerCase()) {
+      return false;
+    }
+    // Difficulty
+    if (selectedDifficulty !== 'All' && ex.difficulty.toLowerCase() !== selectedDifficulty.toLowerCase()) {
+      return false;
+    }
+    // Favorites
+    if (showFavsOnly && !favoriteIds.includes(ex.id)) {
+      return false;
+    }
+    return true;
+  });
+
+  if (!filtered.length) {
+    exerciseList.innerHTML = `
+      <div class="empty-state">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 15s1.5-2 4-2 4 2 4 2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+        <div style="font-size:15px;font-weight:700;margin-bottom:4px;color:var(--text);">No Exercises Found</div>
+        <div style="font-size:12.5px;">Try clearing filters or searching for something else.</div>
+      </div>
+    `;
+    return;
+  }
+
+  exerciseList.innerHTML = filtered.map(ex => {
+    const isFav = favoriteIds.includes(ex.id);
+    return `
+      <div class="ex-card" onclick="openExerciseDetail('${ex.id}')">
+        <div class="ex-header">
+          <div class="ex-title-wrap">
+            <div class="ex-icon-box">${ex.icon || '🏋️'}</div>
+            <div>
+              <div class="ex-name-text">${ex.name}</div>
+              <div class="ex-target-sub">${ex.setsReps || '3 sets × 10 reps'}</div>
+            </div>
+          </div>
+          <button class="fav-btn ${isFav ? 'is-fav' : ''}" onclick="event.stopPropagation(); toggleFavorite('${ex.id}')" aria-label="Favorite">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="${isFav ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          </button>
+        </div>
+
+        <div class="ex-tags">
+          <span class="tag muscle">${ex.muscle}</span>
+          <span class="tag equipment">${ex.equipment}</span>
+          <span class="tag difficulty">${ex.difficulty}</span>
+        </div>
+
+        <div class="ex-footer">
+          <div class="ex-info-item">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+            Learn Form
+          </div>
+          <button class="add-workout-btn" onclick="event.stopPropagation(); addToWorkout('${ex.name}', '${ex.muscle}')">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+            Add to Workout
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// Favorite Toggle
+function toggleFavorite(id) {
+  if (favoriteIds.includes(id)) {
+    favoriteIds = favoriteIds.filter(i => i !== id);
+    showToast('Removed from favorites');
+  } else {
+    favoriteIds.push(id);
+    showToast('Saved to favorites ⭐');
+  }
+  localStorage.setItem(FAV_EX_KEY, JSON.stringify(favoriteIds));
+  renderExercises();
+}
+
+// Add to Workout
+function addToWorkout(name, muscle) {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    let data = raw ? JSON.parse(raw) : {};
+    
+    if (!data.activeWorkout) {
+      data.activeWorkout = {
+        name: "Custom Workout",
+        durationMin: 45,
+        exercises: []
+      };
+    }
+
+    const exists = data.activeWorkout.exercises.find(e => e.name.toLowerCase() === name.toLowerCase());
+    if (!exists) {
+      data.activeWorkout.exercises.push({
+        id: Date.now(),
+        name: name,
+        sets: 3,
+        reps: "10–12",
+        muscle: muscle
+      });
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      showToast(`Added ${name} to Workout! 💪`);
+    } else {
+      showToast(`${name} is already in workout`);
+    }
+  } catch(e) {
+    console.error(e);
+  }
+}
+
+// Open Detail Modal
+function openExerciseDetail(id) {
+  const all = getAllExercises();
+  const ex = all.find(e => e.id === id);
+  if (!ex) return;
+
+  const isFav = favoriteIds.includes(ex.id);
+  const stepsList = ex.steps ? ex.steps.map(s => `<li>${s}</li>`).join('') : '<li>Perform under control with proper form.</li>';
+
+  modalDetailContent.innerHTML = `
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+      <div class="ex-icon-box" style="width:50px;height:50px;font-size:24px;">${ex.icon || '🏋️'}</div>
+      <div>
+        <div class="modal-title">${ex.name}</div>
+        <div class="ex-tags">
+          <span class="tag muscle">${ex.muscle}</span>
+          <span class="tag equipment">${ex.equipment}</span>
+          <span class="tag difficulty">${ex.difficulty}</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="font-size:12.5px;color:var(--muted);margin-bottom:12px;">
+      Target: <b style="color:var(--text);">${ex.muscle}</b> ${ex.secondary ? `(Secondary: ${ex.secondary.join(', ')})` : ''}
+    </div>
+
+    <div style="font-weight:700;font-size:14px;margin-top:14px;margin-bottom:6px;color:var(--green);">Step-by-Step Instructions</div>
+    <ol class="step-list">
+      ${stepsList}
+    </ol>
+
+    ${ex.tip ? `
+      <div class="tip-box">
+        <b>💡 Pro Form Tip</b>
+        ${ex.tip}
+      </div>
+    ` : ''}
+
+    ${ex.mistake ? `
+      <div style="background:#281210;border:1px solid #4a1d18;border-radius:12px;padding:12px;margin-bottom:14px;font-size:12.5px;color:#f0b2aa;">
+        <b style="color:var(--red);display:block;margin-bottom:4px;">❌ Common Mistake</b>
+        ${ex.mistake}
+      </div>
+    ` : ''}
+
+    <div style="display:flex;gap:10px;margin-top:16px;">
+      <button class="add-workout-btn" style="flex:1;padding:12px;font-size:13.5px;justify-content:center;" onclick="addToWorkout('${ex.name}', '${ex.muscle}'); closeDetailSheet();">
+        Add to Workout Routine
+      </button>
+      <button class="fav-toggle ${isFav ? 'active' : ''}" style="padding:12px 16px;" onclick="toggleFavorite('${ex.id}'); openExerciseDetail('${ex.id}');">
+        ⭐ ${isFav ? 'Favorited' : 'Favorite'}
+      </button>
+    </div>
+  `;
+
+  detailModal.classList.add('open');
+}
+
+function closeDetailSheet() {
+  detailModal.classList.remove('open');
+}
+
+// Event Listeners
+searchInput.addEventListener('input', (e) => {
+  searchQuery = e.target.value;
+  clearSearchBtn.classList.toggle('show', searchQuery.length > 0);
+  renderExercises();
+});
+
+clearSearchBtn.addEventListener('click', () => {
+  searchInput.value = '';
+  searchQuery = '';
+  clearSearchBtn.classList.remove('show');
+  renderExercises();
+});
+
+// Category Chips
+categoryScroll.addEventListener('click', (e) => {
+  if (e.target.classList.contains('cat-chip')) {
+    document.querySelectorAll('.cat-chip').forEach(c => c.classList.remove('active'));
+    e.target.classList.add('active');
+    selectedCategory = e.target.dataset.cat;
+    renderExercises();
+  }
+});
+
+// Sub-filters
+equipmentFilter.addEventListener('change', (e) => {
+  selectedEquipment = e.target.value;
+  renderExercises();
+});
+
+difficultyFilter.addEventListener('change', (e) => {
+  selectedDifficulty = e.target.value;
+  renderExercises();
+});
+
+favToggleBtn.addEventListener('click', () => {
+  showFavsOnly = !showFavsOnly;
+  favToggleBtn.classList.toggle('active', showFavsOnly);
+  renderExercises();
+});
+
+// Modal Close Listeners
+closeDetailModal.addEventListener('click', closeDetailSheet);
+detailModal.addEventListener('click', (e) => {
+  if (e.target === detailModal) closeDetailSheet();
+});
+
+// Custom Exercise Modal
+openCustomModal.addEventListener('click', () => {
+  customModal.classList.add('open');
+});
+closeCustomModal.addEventListener('click', () => {
+  customModal.classList.remove('open');
+});
+customModal.addEventListener('click', (e) => {
+  if (e.target === customModal) customModal.classList.remove('open');
+});
+
+// Save Custom Exercise
+saveCustomBtn.addEventListener('click', () => {
+  const name = document.getElementById('customName').value.trim();
+  const muscle = document.getElementById('customMuscle').value;
+  const equipment = document.getElementById('customEquipment').value;
+  const difficulty = document.getElementById('customDifficulty').value;
+  const notes = document.getElementById('customNotes').value.trim();
+
+  if (!name) {
+    alert('Please enter an exercise name.');
+    return;
+  }
+
+  const newEx = {
+    id: 'custom-' + Date.now(),
+    name: name,
+    icon: '✨',
+    muscle: muscle,
+    equipment: equipment,
+    difficulty: difficulty,
+    setsReps: '3 sets × 10–12 reps',
+    steps: notes ? [notes] : ['Perform with controlled tempo and good form.'],
+    tip: 'Custom user exercise.',
+    isCustom: true
+  };
+
+  customExercises.unshift(newEx);
+  localStorage.setItem(CUSTOM_EX_KEY, JSON.stringify(customExercises));
+
+  // Reset & Close
+  document.getElementById('customName').value = '';
+  document.getElementById('customNotes').value = '';
+  customModal.classList.remove('open');
+
+  showToast(`Custom Exercise "${name}" Added!`);
+  renderExercises();
+});
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+// Initial Render
+renderExercises();
+</script>
+</body>
+</html>
