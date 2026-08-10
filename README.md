@@ -267,29 +267,6 @@ Gym-Tracker/
 
 ---
 
-## ⚡ Getting Started
-
-### 1. Clone the repository
-
-```bash
-git clone YOUR_REPOSITORY_URL
-```
-
-### 2. Open the project
-
-Navigate into the project directory:
-
-```bash
-cd Gym-Tracker
-```
-
-### 3. Run the application
-
-Because the application is built using client-side HTML, CSS and JavaScript, it can be opened directly in a browser.
-
-For a better development experience, you can use a local development server such as **VS Code Live Server**.
-
----
 
 ## 🔗 Page Navigation
 
@@ -312,38 +289,8 @@ Each section is designed to work with the shared application data.
 
 ---
 
-## 🔐 Privacy & Data
 
-The current version does not require a backend database or account system.
 
-User fitness information is stored locally in the browser using `localStorage`.
-
-Therefore:
-
-* Data remains on the user's device/browser.
-* No external database is required.
-* Clearing browser storage can remove saved application data.
-
----
-
-## 🚧 Future Improvements
-
-Potential future development areas include:
-
-* [ ] User authentication
-* [ ] Cloud data synchronization
-* [ ] Workout history
-* [ ] Progress tracking
-* [ ] Weight history
-* [ ] Advanced analytics
-* [ ] Progress charts
-* [ ] Personal workout templates
-* [ ] More detailed exercise instructions
-* [ ] Backend database
-* [ ] PWA / installable mobile application
-* [ ] Improved data backup and restore
-
----
 
 ## 🤝 Contributing
 
