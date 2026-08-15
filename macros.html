@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<title>Gym Tracker — Nutrition</title>
+<style>
+  :root{
+    --bg:#0a0a0a;
+    --card:#151515;
+    --card-border:#232323;
+    --text:#f5f5f5;
+    --muted:#9a9a9a;
+    --green:#8fd13f;
+    --green-dark:#5e8f2a;
+    --blue:#4a90e2;
+    --red:#e0473f;
+    --purple:#a259d9;
+    --yellow:#f2c94c;
+    --teal:#2fd1c5;
+    --orange:#f2843c;
+    --radius-lg:18px;
+    --radius-md:14px;
+    --radius-sm:10px;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:"Inter","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    display:flex;
+    justify-content:center;
+  }
+
+  .app {
+  width: 100%;
+  max-width: 430px;
+  min-height: 100vh;
+  background: var(--bg);
+  padding: 70px 18px 90px; /* Match the dashboard padding */
+  position: relative;
+}
+
+  a{color:inherit;text-decoration:none;}
+  button{font-family:inherit;}
+  input,select{font-family:inherit;}
+
+  /* ---------- Header ---------- */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: fixed; /* Changed from sticky */
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 430px;
+  z-index: 100;
+  padding: 12px 18px;
+  background: var(--bg);
+  box-shadow: 0 8px 20px rgba(0,0,0,.3);
+  border-bottom: 1px solid var(--card-border);
+}
+  .back-btn{
+    background:none;
+    border:none;
+    color:var(--text);
+    cursor:pointer;
+    padding:6px;
+    display:flex;
+  }
+  .brand{
+    display:flex;
+    flex-direction:column;
+    line-height:1.05;
+    font-weight:800;
+    letter-spacing:.5px;
+    font-size:15px;
+    text-align:center;
+  }
+  .brand .accent{color:var(--green);}
+  .spacer34{width:34px;}
+
+  h1.page-title{
+    font-size:26px;
+    margin:0 0 4px;
+    font-weight:800;
+  }
+  .subtext{
+    color:var(--muted);
+    font-size:13px;
+    margin:0 0 18px;
+  }
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--card-border);
+    border-radius:var(--radius-lg);
+    padding:16px;
+  }
+  section{margin-bottom:14px;}
+
+  .card-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:12px;
+  }
+  .card-head-left{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-weight:700;
+    font-size:15px;
+  }
+  .pill{
+    background:#1c2c14;
+    color:var(--green);
+    font-size:11px;
+    font-weight:700;
+    padding:4px 10px;
+    border-radius:20px;
+  }
+
+  /* ---------- Macro summary ---------- */
+  .macro-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:10px;
+    margin-bottom:4px;
+  }
+  .macro-card{
+    border-radius:14px;
+    padding:12px 10px;
+    background:#101010;
+    border:1px solid var(--card-border);
+  }
+  .macro-card.protein{
+    background:linear-gradient(160deg,#3f6a1e,#243b10);
+    border-color:transparent;
+  }
+  .macro-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    font-size:11px;
+    color:var(--muted);
+    margin-bottom:6px;
+  }
+  .macro-card.protein .macro-head{color:#d7ecb8;}
+  .macro-head .unit{
+    background:rgba(255,255,255,.08);
+    padding:1px 5px;
+    border-radius:5px;
+    font-size:9.5px;
+  }
+  .macro-val{font-size:19px;font-weight:800;line-height:1;}
+  .macro-val small{font-size:11px;font-weight:600;color:var(--muted);}
+  .macro-card.protein .macro-val small{color:#cfe6ab;}
+  .macro-goal{font-size:9.5px;color:var(--muted);margin-top:4px;}
+  .macro-card.protein .macro-goal{color:#cfe6ab;}
+  .macro-bar{
+    height:5px;
+    border-radius:4px;
+    background:#232323;
+    margin-top:8px;
+    overflow:hidden;
+  }
+  .macro-bar i{display:block;height:100%;border-radius:4px;}
+
+  /* ---------- Add meal form ---------- */
+  .field-label{
+    font-size:11.5px;
+    font-weight:700;
+    color:var(--muted);
+    margin:0 0 6px;
+    text-transform:uppercase;
+    letter-spacing:.4px;
+  }
+  .field{margin-bottom:12px;position:relative;}
+  .text-input, .select-input{
+    width:100%;
+    background:#0f0f0f;
+    border:1px solid var(--card-border);
+    color:var(--text);
+    padding:11px 12px;
+    border-radius:10px;
+    font-size:14px;
+    outline:none;
+  }
+  .text-input:focus, .select-input:focus{border-color:var(--green);}
+  .row-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+
+  .suggest-box{
+    position:absolute;
+    top:100%;left:0;right:0;
+    margin-top:4px;
+    background:#181818;
+    border:1px solid var(--card-border);
+    border-radius:10px;
+    max-height:220px;
+    overflow-y:auto;
+    z-index:20;
+    display:none;
+  }
+  .suggest-box.open{display:block;}
+  .suggest-item{
+    padding:10px 12px;
+    font-size:13.5px;
+    cursor:pointer;
+    border-bottom:1px solid #202020;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+  }
+  .suggest-item:last-child{border-bottom:none;}
+  .suggest-item:hover, .suggest-item.hi{background:#222;}
+  .suggest-item .sname{font-weight:600;}
+  .suggest-item .sserv{color:var(--muted);font-size:11px;}
+
+  .preview-box{
+    background:#0f0f0f;
+    border:1px solid var(--card-border);
+    border-radius:10px;
+    padding:10px 12px;
+    font-size:12px;
+    color:var(--muted);
+    margin-bottom:12px;
+    display:none;
+  }
+  .preview-box.show{display:block;}
+  .preview-box b{color:var(--text);}
+  .preview-box .est-tag{
+    color:var(--yellow);
+    font-weight:700;
+    font-size:10.5px;
+  }
+
+  .btn-primary{
+    width:100%;
+    background:var(--green);
+    color:#122007;
+    border:none;
+    padding:13px;
+    border-radius:12px;
+    font-weight:700;
+    font-size:14.5px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    cursor:pointer;
+  }
+  .btn-primary:active{filter:brightness(.92);}
+  .btn-primary:disabled{opacity:.45;cursor:not-allowed;}
+
+  /* ---------- Logged meals list ---------- */
+  .meals-sub{font-size:12px;color:var(--muted);margin-bottom:10px;}
+  .meal-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:10px 0;
+    border-top:1px solid #202020;
+  }
+  .meal-row:first-of-type{border-top:none;}
+  .meal-tag{
+    font-size:9.5px;
+    font-weight:700;
+    text-transform:uppercase;
+    color:var(--muted);
+    background:#0f0f0f;
+    border:1px solid var(--card-border);
+    border-radius:6px;
+    padding:2px 6px;
+    flex-shrink:0;
+  }
+  .meal-info{flex:1;min-width:0;}
+  .meal-title{font-size:13.5px;font-weight:700;display:flex;align-items:center;gap:6px;}
+  .meal-title .est-dot{
+    width:6px;height:6px;border-radius:50%;
+    background:var(--yellow);
+    flex-shrink:0;
+  }
+  .meal-sub{font-size:11.5px;color:var(--muted);margin-top:2px;}
+  .meal-macros{font-size:11px;color:var(--muted);text-align:right;flex-shrink:0;}
+  .meal-macros b{color:var(--text);font-size:13px;}
+  .del-btn{
+    background:none;
+    border:none;
+    color:#5a5a5a;
+    cursor:pointer;
+    padding:4px;
+    flex-shrink:0;
+  }
+  .del-btn:hover{color:var(--red);}
+  .empty-state{
+    text-align:center;
+    color:var(--muted);
+    font-size:12.5px;
+    padding:22px 10px;
+  }
+
+  .legend-note{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-size:11px;
+    color:var(--muted);
+    margin-top:10px;
+  }
+  .legend-note .est-dot{
+    width:6px;height:6px;border-radius:50%;
+    background:var(--yellow);
+    flex-shrink:0;
+  }
+
+  .toast{
+    position:fixed;
+    bottom:24px;left:50%;
+    transform:translateX(-50%) translateY(20px);
+    background:#1c2c14;
+    color:var(--green);
+    border:1px solid #2e4a1c;
+    padding:10px 18px;
+    border-radius:30px;
+    font-size:13px;
+    font-weight:600;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .25s ease, transform .25s ease;
+    z-index:50;
+  }
+    .bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 430px;
+  background: #0a0a0a;
+  border-top: 1px solid var(--card-border);
+  display: flex;
+  justify-content: space-around;
+  padding: 10px 4px 14px;
+  z-index: 100; /* Ensure it's above content */
+}
+  .nav-item{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:4px;
+    color:var(--muted);
+    font-size:10.5px;
+    font-weight:600;
+    cursor:pointer;
+  }
+  .nav-item.active{color:var(--green);}
+  .nav-item svg{width:21px;height:21px;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ============ HEADER ============ -->
+  <div class="topbar">
+    <a class="back-btn" href="index.html" aria-label="Back to dashboard">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </a>
+    <div class="brand">
+      <span>GYM</span>
+      <span class="accent">TRACKER</span>
+    </div>
+    <div class="spacer34"></div>
+  </div>
+
+  <h1 class="page-title">Nutrition</h1>
+  <p class="subtext">Log what you eat — macros are estimated automatically.</p>
+
+  <!-- ============ DAILY MACRO SUMMARY ============ -->
+  <section class="card">
+    <div class="card-head">
+      <div class="card-head-left">📈 Today's Intake</div>
+      <span class="pill" id="calPill">0 kcal</span>
+    </div>
+    <div class="macro-grid" id="macroGrid"></div>
+  </section>
+
+  <!-- ============ ADD MEAL ============ -->
+  <section class="card">
+    <div class="card-head">
+      <div class="card-head-left">➕ Log a Meal</div>
+    </div>
+
+    <div class="field">
+      <div class="field-label">Food</div>
+      <input type="text" id="foodInput" class="text-input" placeholder="e.g. 2 roti, dal, paneer bhurji..." autocomplete="off" />
+      <div class="suggest-box" id="suggestBox"></div>
+    </div>
+
+    <div class="row-2">
+      <div class="field">
+        <div class="field-label">Quantity</div>
+        <input type="text" id="qtyInput" class="text-input" placeholder="e.g. 2, 150g, 1 bowl" />
+      </div>
+      <div class="field">
+        <div class="field-label">Meal</div>
+        <select id="mealTypeInput" class="select-input">
+          <option>Breakfast</option>
+          <option>Lunch</option>
+          <option>Pre-Workout</option>
+          <option>Post-Workout</option>
+          <option>Dinner</option>
+          <option>Snack</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="preview-box" id="previewBox"></div>
+
+    <button class="btn-primary" id="addMealBtn">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#122007" stroke-width="1.8"/><path d="M12 8v8M8 12h8" stroke="#122007" stroke-width="1.8" stroke-linecap="round"/></svg>
+      Add to Log
+    </button>
+  </section>
+
+  <!-- ============ TODAY'S LOG ============ -->
+  <section class="card">
+    <div class="card-head">
+      <div class="card-head-left">🍽️ Today's Log</div>
+      <span class="pill" id="itemCountPill">0 items</span>
+    </div>
+    <div id="mealsList"><div class="empty-state">Nothing logged yet — add your first meal above.</div></div>
+    <div class="legend-note"><span class="est-dot"></span> Estimated macro (not an exact database match)</div>
+  </section>
+
+</div>
+
+<nav class="bottom-nav">
+  <a class="nav-item" href="index.html">
+    <svg viewBox="0 0 24 24" fill="none"><path d="M4 11l8-7 8 7v9a1 1 0 01-1 1h-4v-6H9v6H5a1 1 0 01-1-1v-9z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+    Dashboard
+  </a>
+  <a class="nav-item" href="workouts.html">
+    <svg viewBox="0 0 24 24" fill="none"><path d="M6.5 6.5l11 11M4 9l3-3M17 20l3-3M2 12l2-2M20 14l2-2M7 5l2-2M15 21l2-2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+    Workouts
+  </a>
+  <a class="nav-item" href="exercises.html">
+    <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="6" r="2" stroke="currentColor" stroke-width="1.8"/><path d="M12 8v6M9 12h6M9 21l3-7 3 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Exercises
+  </a>
+  <a class="nav-item active" href="macros.html">
+    <svg viewBox="0 0 24 24" fill="none"><path d="M6 3v9a2 2 0 002 2h0a2 2 0 002-2V3M8 14v7M18 3c-2 1-3 3-3 6s1 5 3 6M18 3v18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Nutrition
+  </a>
+  <a class="nav-item" href="settings.html">
+    <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M19.4 15a1.7 1.7 0 00.3 1.9l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.9-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1-1.6 1.7 1.7 0 00-1.9.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.9 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1 1.7 1.7 0 00-.3-1.9l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.9.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.9-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.9V9a1.7 1.7 0 001.5 1h.1a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+    Settings
+  </a>
+</nav>
+
+<div class="toast" id="toast">Meal added</div>
+
+<script>
+const FOOD_DB = [
+  { name:"Roti / Chapati",       serving:"1 piece",   cal:120, protein:3,  carbs:18, fats:3.5 },
+  { name:"Rice (cooked)",        serving:"1 plate (~150g)", cal:200, protein:4, carbs:44, fats:0.5 },
+  { name:"Dal (any, cooked)",    serving:"1 katori (~150ml)", cal:150, protein:9, carbs:20, fats:4 },
+  { name:"Paneer Bhurji",        serving:"1 katori",  cal:280, protein:16, carbs:6,  fats:21 },
+  { name:"Paneer (raw)",         serving:"100g",       cal:265, protein:18, carbs:6,  fats:20 },
+  { name:"Chicken Curry",        serving:"1 katori",  cal:260, protein:22, carbs:6,  fats:16 },
+  { name:"Chicken Breast (grilled)", serving:"100g",   cal:165, protein:31, carbs:0,  fats:3.6 },
+  { name:"Egg (boiled)",         serving:"1 piece",   cal:78,  protein:6,  carbs:0.6, fats:5.3 },
+  { name:"Egg Bhurji",           serving:"2 eggs",     cal:220, protein:13, carbs:2,  fats:18 },
+  { name:"Idli",                 serving:"1 piece",   cal:58,  protein:2,  carbs:12, fats:0.3 },
+  { name:"Dosa (plain)",         serving:"1 piece",   cal:133, protein:3,  carbs:18, fats:5 },
+  { name:"Sambar",               serving:"1 katori",  cal:110, protein:5,  carbs:15, fats:3 },
+  { name:"Poha",                 serving:"1 plate",   cal:250, protein:5,  carbs:42, fats:7 },
+  { name:"Upma",                 serving:"1 plate",   cal:230, protein:6,  carbs:35, fats:8 },
+  { name:"Oats (cooked)",        serving:"1 bowl",     cal:150, protein:5,  carbs:27, fats:2.5 },
+  { name:"Banana",               serving:"1 medium",   cal:105, protein:1.3,carbs:27, fats:0.4 },
+  { name:"Apple",                serving:"1 medium",   cal:95,  protein:0.5,carbs:25, fats:0.3 },
+  { name:"Peanut Butter",        serving:"1 tbsp",     cal:95,  protein:4,  carbs:3,  fats:8 },
+  { name:"Whey Protein Shake",   serving:"1 scoop + water", cal:120, protein:24, carbs:3, fats:1.5 },
+  { name:"Curd / Yogurt (plain)",serving:"1 katori",  cal:98,  protein:5,  carbs:7,  fats:5 },
+  { name:"Chole (Chickpea Curry)",serving:"1 katori", cal:270, protein:11, carbs:34, fats:10 },
+  { name:"Rajma (Kidney Bean Curry)",serving:"1 katori", cal:250, protein:10, carbs:32, fats:9 },
+  { name:"Aloo Paratha",         serving:"1 piece",   cal:210, protein:4,  carbs:28, fats:9 },
+  { name:"Plain Paratha",        serving:"1 piece",   cal:180, protein:4,  carbs:24, fats:8 },
+  { name:"Biryani (chicken)",    serving:"1 plate",   cal:450, protein:22, carbs:55, fats:16 },
+  { name:"Mixed Vegetable Sabzi",serving:"1 katori",  cal:130, protein:3,  carbs:14, fats:7 },
+  { name:"Salad (mixed veg)",    serving:"1 bowl",     cal:60,  protein:2,  carbs:11, fats:0.5 },
+  { name:"Almonds",              serving:"10 pieces",  cal:70,  protein:2.6,carbs:2.5,fats:6 },
+  { name:"Milk (full fat)",      serving:"1 glass (250ml)", cal:150, protein:8, carbs:12, fats:8 },
+  { name:"Ghee",                 serving:"1 tsp",      cal:45,  protein:0,  carbs:0,  fats:5 },
+  { name:"Roasted Chana",        serving:"1 handful (~30g)", cal:120, protein:7, carbs:20, fats:2 },
+  { name:"Soya Chunks",          serving:"100g", cal:350, protein:50, carbs:30, fats:1 },
+];
+
+// ===== Dashboard & Nutrition Sync =====
+const STORAGE_KEY = "gymTrackerData";
+
+const DEFAULT_DATA = {
+  user: {
+    weight: 68,
+    height: 173,
+    age: 20,
+    gender: "male",
+    goal: "lean_bulk"
+  },
+  goals: {
+    calories: 0,
+    protein: 0,
+    carbs: 0,
+    fats: 0
+  },
+  nutrition: {
+    meals: [],
+    today: {
+      calories: 0,
+      protein: 0,
+      carbs: 0,
+      fats: 0
+    }
+  }
+};
+
+function calculateMacroGoals(user) {
+  const weight = user.weight || 68;
+  const height = user.height || 173;
+  const age = user.age || 20;
+  const gender = user.gender || "male";
+  const goal = user.goal || "lean_bulk";
+
+  // Dynamic calculations based on user profile
+  const protein = Math.round(weight * 2.35); // ~2.35g/kg
+  const fats = Math.round(weight * 1.03);    // ~1.03g/kg
+
+  const genderOffset = gender === "female" ? -161 : 5;
+  const bmr = (10 * weight) + (6.25 * height) - (5 * age) + genderOffset;
+  const tdee = bmr * 1.35; // Moderate gym activity
+
+  let surplus = 0;
+  if (goal === "lean_bulk" || goal === "bulk") surplus = 300;
+  else if (goal === "cut" || goal === "weight_loss") surplus = -400;
+
+  const calories = Math.max(1200, Math.round(tdee + surplus));
+  
+  const caloriesFromProteinAndFat = (protein * 4) + (fats * 9);
+  const remainingCalForCarbs = calories - caloriesFromProteinAndFat;
+  const carbs = Math.max(50, Math.round(remainingCalForCarbs / 4));
+
+  return { calories, protein, carbs, fats };
+}
+
+function loadGymTrackerData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      return {
+        ...parsed,
+        user: { ...DEFAULT_DATA.user, ...(parsed.user || {}) },
+        goals: parsed.goals || { calories: 0, protein: 0, carbs: 0, fats: 0 },
+        nutrition: {
+          meals: (parsed.nutrition && Array.isArray(parsed.nutrition.meals)) ? parsed.nutrition.meals : [],
+          today: (parsed.nutrition && parsed.nutrition.today) ? parsed.nutrition.today : { calories: 0, protein: 0, carbs: 0, fats: 0 }
+        }
+      };
+    }
+  } catch (e) {
+    console.error("Error reading gymTrackerData from localStorage", e);
+  }
+  return JSON.parse(JSON.stringify(DEFAULT_DATA));
+}
+
+let trackerData = loadGymTrackerData();
+
+// Calculate macro goals dynamically based on user profile
+trackerData.goals = calculateMacroGoals(trackerData.user);
+
+const GOALS = trackerData.goals;
+
+let loggedMeals = trackerData.nutrition.meals || [];
+let activeMatch = null;
+let highlightIndex = -1;
+
+function saveGymTrackerData() {
+  const totals = computeTotals();
+  
+  const todayTotals = {
+    calories: Math.round(totals.calories),
+    protein: Math.round(totals.protein * 10) / 10,
+    carbs: Math.round(totals.carbs * 10) / 10,
+    fats: Math.round(totals.fats * 10) / 10
+  };
+
+  // Re-read the latest data before saving so we don't clobber changes another
+  // tab/page (e.g. workouts.html) made to keys we don't own, like activeWorkout.
+  let latest = {};
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) latest = JSON.parse(raw);
+  } catch (e) {
+    console.error("Error reading latest gymTrackerData before save", e);
+  }
+
+  trackerData = {
+    ...latest,
+    ...trackerData,
+    nutrition: {
+      ...(latest.nutrition || {}),
+      ...trackerData.nutrition,
+      meals: loggedMeals,
+      today: todayTotals
+    }
+  };
+
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(trackerData));
+  } catch (e) {
+    console.error("Error saving gymTrackerData to localStorage", e);
+  }
+}
+// ===== End Dashboard & Nutrition Sync =====
+
+function searchFood(query){
+  const q = query.trim().toLowerCase();
+  if (!q) return [];
+  return FOOD_DB
+    .filter(f => f.name.toLowerCase().includes(q))
+    .sort((a,b) => a.name.toLowerCase().indexOf(q) - b.name.toLowerCase().indexOf(q))
+    .slice(0, 6);
+}
+
+function parseQtyMultiplier(qtyRaw, food){
+  const raw = (qtyRaw || "").trim().toLowerCase();
+  if (!raw) return { mult: 1, label: food ? food.serving : "1 serving" };
+
+  const gramMatch = raw.match(/^(\d+(\.\d+)?)\s*g$/);
+  if (gramMatch && food){
+    const servingGramGuess = extractGramsFromServing(food.serving) || 100;
+    const grams = parseFloat(gramMatch[1]);
+    return { mult: grams / servingGramGuess, label: grams + "g" };
+  }
+
+  const numMatch = raw.match(/^(\d+(\.\d+)?)/);
+  if (numMatch){
+    const n = parseFloat(numMatch[1]);
+    return { mult: n, label: raw };
+  }
+
+  return { mult: 1, label: raw || (food ? food.serving : "1 serving") };
+}
+
+function extractGramsFromServing(servingStr){
+  const m = servingStr.match(/(\d+(\.\d+)?)g/);
+  return m ? parseFloat(m[1]) : null;
+}
+
+function estimateUnknownFood(name){
+  return { name, serving:"1 serving (est.)", cal:220, protein:8, carbs:24, fats:9 };
+}
+
+const foodInput = document.getElementById("foodInput");
+const qtyInput = document.getElementById("qtyInput");
+const suggestBox = document.getElementById("suggestBox");
+const previewBox = document.getElementById("previewBox");
+const addBtn = document.getElementById("addMealBtn");
+
+function renderSuggestions(){
+  const results = searchFood(foodInput.value);
+  highlightIndex = -1;
+  if (!results.length){
+    suggestBox.classList.remove("open");
+    suggestBox.innerHTML = "";
+    return;
+  }
+  suggestBox.innerHTML = results.map((f,i) => `
+    <div class="suggest-item" data-idx="${i}">
+      <span class="sname">${f.name}</span>
+      <span class="sserv">${f.serving}</span>
+    </div>
+  `).join("");
+  suggestBox.classList.add("open");
+
+  [...suggestBox.querySelectorAll(".suggest-item")].forEach((el, i) => {
+    el.addEventListener("click", () => selectFood(results[i]));
+  });
+}
+
+function selectFood(food){
+  activeMatch = food;
+  foodInput.value = food.name;
+  suggestBox.classList.remove("open");
+  updatePreview();
+}
+
+function updatePreview(){
+  const typed = foodInput.value.trim();
+  if (!typed){
+    previewBox.classList.remove("show");
+    addBtn.disabled = true;
+    return;
+  }
+
+  if (activeMatch && activeMatch.name.toLowerCase() !== typed.toLowerCase()){
+    activeMatch = null;
+  }
+
+  const food = activeMatch || estimateUnknownFood(typed);
+  const { mult, label } = parseQtyMultiplier(qtyInput.value, food);
+  const cal = Math.round(food.cal * mult);
+  const protein = +(food.protein * mult).toFixed(1);
+  const carbs = +(food.carbs * mult).toFixed(1);
+  const fats = +(food.fats * mult).toFixed(1);
+  const isEstimate = !activeMatch;
+
+  previewBox.innerHTML = `
+    ${isEstimate ? '<span class="est-tag">● ESTIMATED</span> — no exact match, using a typical serving.<br/>' : ''}
+    <b>${cal} kcal</b> · P ${protein}g · C ${carbs}g · F ${fats}g
+    <span style="opacity:.7"> (${label || food.serving})</span>
+  `;
+  previewBox.classList.add("show");
+  addBtn.disabled = false;
+}
+
+foodInput.addEventListener("input", () => { renderSuggestions(); updatePreview(); });
+qtyInput.addEventListener("input", updatePreview);
+foodInput.addEventListener("focus", renderSuggestions);
+document.addEventListener("click", (e) => {
+  if (!suggestBox.contains(e.target) && e.target !== foodInput){
+    suggestBox.classList.remove("open");
+  }
+});
+foodInput.addEventListener("keydown", (e) => {
+  const items = [...suggestBox.querySelectorAll(".suggest-item")];
+  if (!items.length) return;
+  if (e.key === "ArrowDown"){ e.preventDefault(); highlightIndex = Math.min(highlightIndex+1, items.length-1); }
+  else if (e.key === "ArrowUp"){ e.preventDefault(); highlightIndex = Math.max(highlightIndex-1, 0); }
+  else if (e.key === "Enter"){ e.preventDefault(); if (highlightIndex>=0) items[highlightIndex].click(); return; }
+  else return;
+  items.forEach((el,i)=>el.classList.toggle("hi", i===highlightIndex));
+});
+
+addBtn.addEventListener("click", () => {
+  const typed = foodInput.value.trim();
+  if (!typed) return;
+
+  const food = activeMatch || estimateUnknownFood(typed);
+  const { mult, label } = parseQtyMultiplier(qtyInput.value, food);
+
+  loggedMeals.push({
+    id: Date.now(),
+    mealType: document.getElementById("mealTypeInput").value,
+    name: food.name,
+    qtyLabel: label || food.serving,
+    cal: Math.round(food.cal * mult),
+    protein: +(food.protein * mult).toFixed(1),
+    carbs: +(food.carbs * mult).toFixed(1),
+    fats: +(food.fats * mult).toFixed(1),
+    estimated: !activeMatch
+  });
+
+  foodInput.value = "";
+  qtyInput.value = "";
+  activeMatch = null;
+  previewBox.classList.remove("show");
+  addBtn.disabled = true;
+
+  renderAll();
+  saveGymTrackerData();
+  showToast("Meal added");
+});
+
+function removeMeal(id){
+  loggedMeals = loggedMeals.filter(m => m.id !== id);
+  renderAll();
+  saveGymTrackerData();
+}
+
+function computeTotals(){
+  return loggedMeals.reduce((acc, m) => {
+    acc.calories += m.cal;
+    acc.protein += m.protein;
+    acc.carbs += m.carbs;
+    acc.fats += m.fats;
+    return acc;
+  }, { calories:0, protein:0, carbs:0, fats:0 });
+}
+
+function renderMacroGrid(){
+  const totals = computeTotals();
+  document.getElementById("calPill").textContent = Math.round(totals.calories) + " kcal";
+
+  const cards = [
+    { key:"protein",  label:"Protein",       unit:"g",    color:"#8fd13f", val: totals.protein },
+    { key:"carbs",    label:"Carbohydrates", unit:"g",    color:"#4a90e2", val: totals.carbs },
+    { key:"fats",     label:"Fats",          unit:"g",    color:"#f2c94c", val: totals.fats },
+    { key:"calories", label:"Calories",      unit:"kcal", color:"#f2843c", val: totals.calories },
+  ];
+
+  document.getElementById("macroGrid").innerHTML = cards.map(c => {
+    const goal = GOALS[c.key];
+    const pct = Math.min(100, (c.val / goal) * 100);
+    const isProtein = c.key === "protein";
+    return `
+      <div class="macro-card ${isProtein ? "protein" : ""}">
+        <div class="macro-head"><span>${c.label}</span><span class="unit">${c.unit}</span></div>
+        <div class="macro-val">${Math.round(c.val*10)/10}<small>${c.unit}</small></div>
+        <div class="macro-goal">of ${goal}${c.unit} Goal</div>
+        <div class="macro-bar"><i style="width:${pct}%;background:${c.color}"></i></div>
+      </div>
+    `;
+  }).join("");
+}
+
+function renderMealsList(){
+  const list = document.getElementById("mealsList");
+  document.getElementById("itemCountPill").textContent = loggedMeals.length + " item" + (loggedMeals.length===1?"":"s");
+
+  if (!loggedMeals.length){
+    list.innerHTML = `<div class="empty-state">Nothing logged yet — add your first meal above.</div>`;
+    return;
+  }
+
+  const order = ["Breakfast","Pre-Workout","Lunch","Post-Workout","Snack","Dinner"];
+  const sorted = [...loggedMeals].sort((a,b) => order.indexOf(a.mealType) - order.indexOf(b.mealType));
+
+  list.innerHTML = sorted.map(m => `
+    <div class="meal-row">
+      <span class="meal-tag">${m.mealType}</span>
+      <div class="meal-info">
+        <div class="meal-title">${m.estimated ? '<span class="est-dot"></span>' : ''}${m.name}</div>
+        <div class="meal-sub">${m.qtyLabel}</div>
+      </div>
+      <div class="meal-macros">
+        <b>${m.cal} kcal</b><br/>P${m.protein} C${m.carbs} F${m.fats}
+      </div>
+      <button class="del-btn" onclick="removeMeal(${m.id})" aria-label="Remove">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+  `).join("");
+}
+
+function renderAll(){
+  renderMacroGrid();
+  renderMealsList();
+}
+
+function showToast(msg){
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 1600);
+}
+
+function loadLog(){
+  trackerData = loadGymTrackerData();
+  trackerData.goals = calculateMacroGoals(trackerData.user);
+  loggedMeals = trackerData.nutrition.meals;
+  saveGymTrackerData();
+  renderAll();
+}
+
+loadLog();
+</script>
+</body>
+</html>
